@@ -60,9 +60,9 @@ public class GameScreen extends AppCompatActivity {
         quest = new Quest();
         String o = "";
 
-        for(int c = 0; c < quest.getSequenceOfActions().size(); c++)
+        for(int c = 0; c < quest.getQuestList().size(); c++)
         {
-            o = o + quest.getSequenceOfActions().get(c).getActionName() + " ";
+            o = o + quest.getQuestList().get(c).getActionName() + " ";
         }
         TextView txtVQuestDescription = (TextView) findViewById(R.id.txtV_QuestDescription);
         txtVQuestDescription.setText(o);
@@ -72,7 +72,7 @@ public class GameScreen extends AppCompatActivity {
 
     private void extendQuest(){
 
-        quest.getSequenceOfActions().get(1);
+        quest.getQuestList().get(1);
 
 
     }

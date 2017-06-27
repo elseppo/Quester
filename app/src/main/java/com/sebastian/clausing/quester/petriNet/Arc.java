@@ -21,6 +21,7 @@ extends PetrinetObject {
          */
         
         PLACE_TO_TRANSITION {
+
             @Override
             public boolean canFire(Place p, int weight) {
                 return p.hasAtLeastTokens(weight);
@@ -30,6 +31,12 @@ extends PetrinetObject {
             public void fire(Place p, int weight) {
                 p.removeTokens(weight);
             }
+
+            public String getOrientation() {
+                return "PLACE_TO_TRANSITION";
+            }
+
+
 
         },
         
@@ -44,11 +51,19 @@ extends PetrinetObject {
                 p.addTokens(weight);
             }
 
+            public String getOrientation() {
+                return "TRANSITION_TO_PLACE";
+            }
+
+
         };
 
         public abstract boolean canFire(Place p, int weight);
 
         public abstract void fire(Place p, int weight);
+
+        public abstract String getOrientation();
+
     }
     
     public Arc(String name, Direction d, Place p, Transition t) {
@@ -83,4 +98,21 @@ extends PetrinetObject {
     public int getWeight() {
         return weight;
     }
+
+    public Direction getDirection(){
+        return direction;
+    }
+
+    public String getOrientation(){
+        return direction.getOrientation();
+    }
+
+    public Transition getTransition(){
+        return transition;
+    }
+
+    public Place getPlace(){
+        return place;
+    }
+
 }
