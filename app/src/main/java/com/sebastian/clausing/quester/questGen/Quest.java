@@ -12,8 +12,10 @@ import com.sebastian.clausing.quester.petriNet.Petrinet;
 import com.sebastian.clausing.quester.petriNet.Place;
 import com.sebastian.clausing.quester.petriNet.Transition;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by Sebs-Desktop on 21.06.2017.
@@ -23,10 +25,14 @@ public class Quest {
 
     // Objects for instance-counting
     private Increment countAction = new Increment();
+    Increment countPlace = new Increment();
+    Increment countTransition = new Increment();
+    Increment countArc = new Increment();
 
 
     //Lists
     private ArrayList<Integer> abstractQuestList = new ArrayList<Integer>();
+    private ArrayList<Action> abstractActionList = new ArrayList<>();
     private ArrayList<Integer> appliedRulesList = new ArrayList<>();
     private ArrayList<Action> questList = new ArrayList<Action>();
 
@@ -44,6 +50,9 @@ public class Quest {
 
 
     public Quest(){
+
+        Log.d("Quest", "--- NEW QUEST CONSTRUCTOR START -------------------------------------------------");
+
         Log.d("Quest", "----------> OpenDB");
         questerDB = dbHelper.getStaticDb();
 
@@ -53,23 +62,19 @@ public class Quest {
         Log.d("Quest", "---------> Close DB");
         questerDB.close();
 
-        Log.d("Quest", "---------> Abstract PetriNet");
+        Log.d("Quest", "---------> Create abstract PetriNet");
         abstractPetriNet();
+        printPetri();
 
         Log.d("Quest", "---------> Find Split and Merge");
         findSplitMerge();
 
-        Log.d("Quest", "---------> Print Lists");
-        printLists();
-
-        Log.d("Quest", "---------> Simulate Petri Net");
+        printRewrittenActions();
         simulatePetri();
 
         Log.d("Quest", "---------> Exit Constructor Quest");
 
     }
-
-
 
     private void determineMotivation(){
         //Determine Motivation
@@ -366,55 +371,85 @@ public class Quest {
             questList.add(new Action(countAction.increment(), abstractQuestList.get(c)));
         }
 
-    }
-
-    public void findSplitMerge(){
-
-        Arc arcS;
-        Place pConn;
-
-        //Soulution for ConcurrentModificationException if " for(Arc a: quest.getArcs()){...} "
-        int i = quest.getArcs().size();
-
-        for (int c = 0; c < i; c++){
-
-            arcS = quest.getArcs().get(c);
-
-            pConn = arcS.getPlace();             // Place between the Split and Merge Transition
-            Transition tSplit = arcS.getTransition();  // Transition, which splits the net
-            Transition tMerge = null;                  // Transition, which merges the net
-            boolean bln = tSplit.getAction().getRewriteAction();
-
-            if(bln==true && arcS.getOrientation().equals("TRANSITION_TO_PLACE")) {
-                // If entered: We have an Arc, thats pointing from an REWRITABLE TRANSITION towards a PLACE
-
-                Log.d("Quest findSplitMerge", "xxxx pConn name: " + pConn.getName());
-                // The Transition indicates an AND SPLIT in the petri net
-                // NOW, find the Transition, that MERGES the AND
-
-
-                for(Arc arcM: quest.getArcs()){
-                    if(arcM.getOrientation().equals("PLACE_TO_TRANSITION") && arcM.getPlace().equals(pConn)){
-                        tMerge = arcM.getTransition();
-                        Log.d("Quest findSplitMerge", "xxxx tMerge name: " + tMerge.getName());
-                    }
-                }
-
-                // Now all needed information for rewriting are together
-                applyRules(tSplit, tMerge);
-            }
-
+        //Fill abstractActionList with Actions
+        for(Action a: questList){
+            abstractActionList.add(a);
         }
 
     }
 
-    public ArrayList<Action> getQuestList(){
-        //Log.d("Quest gSOA","Motivation = " + motivationName);
-        //Log.d("Quest gSOA","Strategy = " + strategyName);
-        return questList;
+    private void findSplitMerge(){
+
+        //Soulution for ConcurrentModificationException if " for(Arc a: quest.getArcs()){...} "
+        List<Arc> arcListFS = new ArrayList<Arc>();
+
+        //Copy List of Arcs in PetriNet
+        for(Arc a: quest.getArcs()){
+            arcListFS.add(a);
+        }
+
+        int listSize = arcListFS.size();
+
+
+        Arc arcS;
+
+        Log.d("Quest findSplitMerge ", "Search For Possible Split");
+        for (int c = 0; c < listSize; c++){
+
+            arcS = arcListFS.get(c);
+
+            Transition tSplit = arcS.getTransition();  // Transition, which splits the net
+            boolean isActionRewritable = tSplit.getAction().getRewriteAction();
+
+            Log.d("Quest findSplitMerge ", "Check #" + c + ": Arc " + arcS.getName() + " Orientation: " + arcS.getOrientation());
+
+            if(isActionRewritable==true && arcS.getOrientation().equals("TRANSITION_TO_PLACE")) {
+                // If entered: We have an Arc, thats pointing from an REWRITABLE TRANSITION towards a PLACE
+                // The Transition indicates an AND SPLIT in the petrinet
+                // NOW, find the Transition, that MERGES the AND
+                Place pConn = arcS.getPlace();               // Place between the Split and Merge Transition
+
+                Log.d("Quest findSplitMerge", "Possible Split at: " + tSplit.getName());
+                Log.d("Quest findSplitMerge", "Connection Place: " + pConn.getName());
+
+                // Check again all Arcs, to find the Merge Transition
+                // E.g. The transition which pConn points at
+
+                boolean mergeFound = false;
+                int c1 = 0;
+
+                while(c1 < listSize && mergeFound == false){
+                    c1++;
+
+                    Arc arcM = arcListFS.get(c1);
+                    Log.d("Quest findSplitMerge ", "Search Merge for: " + tSplit.getName() + " | AT: " + arcM.getName());
+
+                    if(arcM.getOrientation().equals("PLACE_TO_TRANSITION") && arcM.getPlace().equals(pConn)){
+                        Transition tMerge = arcM.getTransition();  // Transition, which merges the net
+                        Log.d("Quest findSplitMerge", "Possible Merge at: " + tMerge.getName());
+
+                        mergeFound = true;
+
+                        // Now all needed information for rewriting are together
+                        applyRules(tSplit, tMerge);
+                    }
+                    else{
+                        Log.d("Quest findSplitMerge ", "- Cannot Merge at: " + arcM.getName() + " at Orientation " + arcM.getOrientation());
+                    }
+                }
+
+                if(mergeFound = true){
+                    Log.d("Quest findSplitMerge ", "Rewrite Succesfull");
+                }else{
+                    Log.d("Quest findSplitMerge ", "Rewrite Failed");
+                }
+
+
+            }
+        }
     }
 
-    public void openDB(){
+    private void openDB(){
         questerDB = dbHelper.getStaticDb();
     }
 
@@ -599,7 +634,7 @@ public class Quest {
         }
     }
 
-    private void applyRules(Transition prmTSplit, Transition prmTMerge) {
+    private void applyRules_old2(Transition prmTSplit, Transition prmTMerge) {
 
         ArrayList<Action> newActionsList = new ArrayList<>();
 
@@ -639,6 +674,8 @@ public class Quest {
                                 Log.d("Quest_rewrite Actions: " ,"Rule 3: [<goto> --> goto]");
                                 break;
                             case 1:
+                                Log.d("Quest_rewrite Actions: " ,"c: " + c);
+
                                 newActionsList.add(new Action(countAction.increment() ,7));    //explore
 
                                 changeQuestList(newActionsList,c);
@@ -665,6 +702,7 @@ public class Quest {
                         break;
 
                     case 16: // <spy>
+                        Log.d("Quest_rewrite Actions: " ,"c: " + c);
                         newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
                         newActionsList.add(new Action(countAction.increment() ,27)); //spy
                         newActionsList.add(new Action(countAction.increment() ,10)); //<goto>
@@ -679,6 +717,7 @@ public class Quest {
                             case 0:
                                 newActionsList.add(new Action(countAction.increment() ,29));   //get
                                 changeQuestList(newActionsList,c);
+                                appliedRulesList.add(10);
                                 Log.d("Quest_rewrite Actions: " ,"Rule 10: [<get> --> get]");
                                 break;
                             case 1:
@@ -799,17 +838,221 @@ public class Quest {
         }
     }
 
-    private void changeQuestList(ArrayList<Action> prmList, int c){
-        int i=0;
-        questList.remove(c);
 
-        for(Action a: prmList){
-            questList.add(c+i, a);
-            i++;
+    private void applyRules(Transition prmTSplit, Transition prmTMerge) {
+
+        ArrayList<Action> newActionsList = new ArrayList<>();
+        newActionsList.clear();
+
+        Log.d("Quest applyRules: " , "-----> Check " + prmTSplit.getName() + " Action: " + prmTSplit.getAction().getActionName());
+
+        int c = prmTSplit.getAction().getActionID();
+        // For each action ID, there are several Rules how to rewrite them
+
+        switch (c) {
+            case 1: // <capture>
+                Log.d("Quest applyRules: " ,"Rule 17: [<capture> --> <get>, <goto>, capture]");
+                appliedRulesList.add(17);
+
+                newActionsList.add(new Action(countAction.increment() ,20)); //<get>
+                newActionsList.add(new Action(countAction.increment() ,10)); //<goto>
+                newActionsList.add(new Action(countAction.increment() ,24)); //capture
+                rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                break;
+
+            case 10: // <goto>
+                switch ((int) (Math.random() * 3)) {
+                    case 0:
+                        Log.d("Quest applyRules: " ,"Rule 3: [<goto> --> goto]");
+                        appliedRulesList.add(3);
+
+                        newActionsList.add(new Action(countAction.increment() ,25));   // goto
+
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 1:
+                        Log.d("Quest applyRules: " ,"Rule 4: [<goto> --> explore]");
+                        appliedRulesList.add(4);
+
+                        newActionsList.add(new Action(countAction.increment() ,7));    //explore
+
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 2:
+                        appliedRulesList.add(5);
+                        Log.d("Quest applyRules: " ,"Rule 5: [<goto> --> <learn>, goto]");
+                        newActionsList.add(new Action(countAction.increment() ,23));   //<learn>
+                        newActionsList.add(new Action(countAction.increment() ,25)); //goto
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                }
+                break;
+
+            case 11: // <kill>
+                appliedRulesList.add(18);
+                Log.d("Quest applyRules: " ,"Rule 18: [<kill> --> <goto>, kill]");
+                newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                newActionsList.add(new Action(countAction.increment() ,25)); //kill
+                rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                break;
+
+            case 16: // <spy>
+                appliedRulesList.add(16);
+                Log.d("Quest applyRules: " ,"Rule 16: [<spy> --> <goto>, spy, <goto>, report]");                newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                newActionsList.add(new Action(countAction.increment() ,27)); //spy
+                newActionsList.add(new Action(countAction.increment() ,10)); //<goto>
+                newActionsList.add(new Action(countAction.increment() ,15)); //report
+                rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                break;
+
+            case 20: // <get>
+                switch ((int) (Math.random() * 4)) {
+                    case 0:
+                        appliedRulesList.add(10);
+                        Log.d("Quest applyRules: " ,"Rule 10: [<get> --> get]");
+                        newActionsList.add(new Action(countAction.increment() ,29));   //get
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 1:
+                        appliedRulesList.add(11);
+                        Log.d("Quest applyRules: " ,"Rule 11: [<get> --> <steal>]");
+                        newActionsList.add(new Action(countAction.increment() ,21));   //<steal>
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 2:
+                        appliedRulesList.add(12);
+                        Log.d("Quest applyRules: " ,"Rule 12: [<get> --> <goto>, <gather>]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,8));   //<gather>
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 3:
+                        appliedRulesList.add(13);
+                        Log.d("Quest applyRules: " ,"Rule 13: [<get> --> <goto>, <get>, <goto>, <subquest>, exchange]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,20)); //<get>
+                        newActionsList.add(new Action(countAction.increment() ,10)); //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,22)); //<subquest>
+                        newActionsList.add(new Action(countAction.increment() ,5)); //exchange
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                }
+                break;
+
+            case 21: // <steal>
+                switch ((int) (Math.random() * 2)) {
+                    case 0:
+                        appliedRulesList.add(14);
+                        Log.d("Quest applyRules: " ,"Rule 14: [<steal> --> <goto>, stealth, take]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,17)); //stealth
+                        newActionsList.add(new Action(countAction.increment() ,18)); //take
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 1:
+                        appliedRulesList.add(15);
+                        Log.d("Quest applyRules: " ,"Rule 15: [<steal> --> <goto>, <kill>, take]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,11)); //<kill>
+                        newActionsList.add(new Action(countAction.increment() ,18)); //take
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                }
+                break;
+
+            case 22: // <subquest>
+                switch ((int) (Math.random() * 2)) {
+                    case 0:
+                        appliedRulesList.add(1);
+                        Log.d("Quest applyRules: " ,"Rule 1: [<subquest> --> <goto>]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 1:
+                        appliedRulesList.add(2);
+                        Log.d("Quest applyRules: " ,"Rule 2: [<subquest> --> <goto>, <Quest>, <goto>]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,28)); //<Quest>
+                        newActionsList.add(new Action(countAction.increment() ,10)); //<goto>
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                }
+                break;
+
+            case 23: // <learn>
+                switch ((int) (Math.random() * 4)) {
+                    case 0:
+                        appliedRulesList.add(6);
+                        Log.d("Quest applyRules: " ,"Rule 6: [<learn> --> learn]");
+                        newActionsList.add(new Action(countAction.increment() ,30));   //learn
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 1:
+                        appliedRulesList.add(7);
+                        Log.d("Quest applyRules: " ,"Rule 7: [<learn> --> <goto>, <subquest>, listen]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,22)); //<subquest>
+                        newActionsList.add(new Action(countAction.increment() ,12)); //listen
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 2:
+                        appliedRulesList.add(8);
+                        Log.d("Quest applyRules: " ,"Rule 8: [<get> --> <goto>, <get>, read]");
+                        newActionsList.add(new Action(countAction.increment() ,10));   //<goto>
+                        newActionsList.add(new Action(countAction.increment() ,20)); //<get>
+                        newActionsList.add(new Action(countAction.increment() ,13)); //read
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                    case 3:
+                        appliedRulesList.add(9);
+                        Log.d("Quest applyRules: " ,"Rule 9: [<get> --> <subquest>, give, listen]");
+                        newActionsList.add(new Action(countAction.increment() ,20));   //<get>
+                        newActionsList.add(new Action(countAction.increment() ,22)); //<subquest>
+                        newActionsList.add(new Action(countAction.increment() ,9)); //give
+                        newActionsList.add(new Action(countAction.increment() ,12)); //listen
+                        rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                        break;
+                }
+                break;
+
+            default:
+                Log.d("Quest applyRules: " ,"-----> No change to:" + prmTSplit.getName()) ;
+                break;
         }
     }
 
-    public void rewritePetrinet(Transition prmTSplit, Transition prmTMerge, ArrayList<Action> prmActionList){
+    private void changeQuestList(ArrayList<Action> prmList, int prmC){
+        Log.d("Quest changeQuestList: " , "Remove: " + questList.get(prmC).getActionName() + " From " + prmC);
+        questList.remove(prmC);
+
+        for(Action a: prmList){
+            questList.add(prmC, a);
+            Log.d("Quest changeQuestList: " , "Add: " + a.getActionName() + " To " + prmC);
+            prmC = prmC+1;
+        }
+    }
+
+    private void rewritePetrinet(Transition prmTSplit, Transition prmTMerge, ArrayList<Action> prmActionList){
+
+        Log.d("Quest rewritePetrinet", "Split at: " + prmTSplit.getName() + " | Merge at: " + prmTMerge.getName());
 
         Increment countPlace = new Increment();
         Increment countTransition = new Increment();
@@ -819,81 +1062,100 @@ public class Quest {
         Transition transition;
         Arc arc;
 
+        prmTSplit.getAction().setRewriteAction(false);
+        prmTSplit.getAction().setIsActionRewritten(true);
+
         // First Place after the Split
-        place = new Place(prmTSplit.getName() + " / " + placeName(prmTSplit.getAction().getActionName(), countPlace.increment()),0);
+        place = new Place(setName("P"),0);
         quest.add(place);
 
         // Arc from Split Transition to first Place
-        Arc arcTP = new Arc(arcName(countArc.increment(), prmTSplit.getName(), place.getName()),prmTSplit, place);
+        Arc arcTP = new Arc(setName("A"),prmTSplit, place);
         quest.add(arcTP);
 
         for(Action a: prmActionList){
 
             //Setup Transition
-            transition = new Transition(prmTSplit.getName() + " / " + transitionName(a.getActionName(), countTransition.increment()));
+            transition = new Transition(setName("T"));
             transition.setAction(a);
             quest.add(transition);
 
             // Setup Arc last P -> Current T
-            arc = new Arc(arcName(countArc.increment(), place.getName(), transition.getName()),place, transition);
+            arc = new Arc(setName("A"),place, transition);
             quest.add(arc);
 
             //Setup New Place
-            place = new Place(prmTSplit.getName() + " / " + placeName(a.getActionName(), countPlace.increment()),0);
+            place = new Place(setName("P"),0);
             quest.add(place);
 
             //Setup Arc Current T -> New P
-            arc = new Arc(arcName(countArc.increment(), transition.getName(), place.getName()), transition, place);
+            arc = new Arc(setName("A"), transition, place);
             quest.add(arc);
         }
 
         // Connection the last place with the merge Transition
-        Arc arcPT = new Arc(arcName(countArc.increment(), place.getName(), prmTMerge.getName()),place, prmTMerge);
+        Arc arcPT = new Arc(setName("A"),place, prmTMerge);
         quest.add(arcPT);
 
+        Log.d("Quest rewritePetrinet", "Print new Petrinet");
     }
 
     private void abstractPetriNet(){
-
-        Increment countPlace = new Increment();
-        Increment countTransition = new Increment();
-        Increment countArc = new Increment();
 
         Transition transition;
         Arc arc;
         Place place;
 
-        place = new Place(placeName("Start", countPlace.increment()),1);                                                // create Start place
+        place = new Place(setName("S"),1);                                                // create Start place
         quest.add(place);
 
         for(Action a: questList){
 
             //Setup Transition
-            transition = new Transition(transitionName(a.getActionName(), countTransition.increment()));
+            transition = new Transition(setName("T"));
             transition.setAction(a);
             quest.add(transition);
 
             // Setup Arc last P -> Current T
-            arc = new Arc(arcName(countArc.increment(), place.getName(), transition.getName()),place, transition);
+            arc = new Arc(setName("A"),place, transition);
             quest.add(arc);
 
             //Setup New Place
-            place = new Place(placeName(a.getActionName(), countPlace.increment()),0);
+            place = new Place(setName("P"),0);
             quest.add(place);
 
             //Setup Arc Current T -> New P
-            arc = new Arc(arcName(countArc.increment(), transition.getName(), place.getName()), transition, place);
+            arc = new Arc(setName("A"), transition, place);
             quest.add(arc);
 
         }
+
+        // Setup TRANSITION FINISH QUEST
+        //Setup Transition
+        transition = new Transition(setName("F"));
+        transition.setAction(new Action (countAction.increment(),0));
+        quest.add(transition);
+
+        // Setup Arc last P -> Current T
+        arc = new Arc(setName("A"), place, transition);
+        quest.add(arc);
+
+        // Setup END PACE
+        place = new Place(setName("E"),0);                                                // create Start place
+        quest.add(place);
+
+        //Setup Arc Current T -> New P
+        arc = new Arc(setName("A"), transition, place);
+        quest.add(arc);
     }
 
     private void printLists(){
 
+        Log.d("Quest", "---------> Print Lists");
 
-        Log.d("Quest pL: " , "#Actions: " + questList.size());
+        Log.d("Quest printLists: " , "#Actions: " + questList.size());
         for(int r = 0; r < questList.size(); r++) {
-            Log.d("Quest pL" , " Action ID: " + questList.get(r).getActionID()+ " Action Name: " + questList.get(r).getActionName());
+            Log.d("Quest printLists" , " Action ID: " + questList.get(r).getActionID()+ " Action Name: " + questList.get(r).getActionName());
         }
 
         Log.d("Quest pL: " , "#Used Rules: : " + appliedRulesList.size());
@@ -903,7 +1165,7 @@ public class Quest {
 
     }
 
-    private String placeName(String prmName, int prmIncrement){
+    private String placeNameO(String prmName, int prmIncrement){
         String name;
         if (prmName.equals("Start") || prmName.equals("End"))
         {
@@ -915,95 +1177,69 @@ public class Quest {
         return name;
     }
 
-    private String transitionName(String prmName,int prmIncrement){
+    private String transitionNameO(String prmName,int prmIncrement){
         String name = "T" + prmIncrement + " ("+ prmName+")";
         return name;
     }
 
-    private String arcName(int prmIncrement, String prmFrom, String prmTo){
+    private String arcNameO(int prmIncrement, String prmFrom, String prmTo){
         String name = "A" + prmIncrement + " [" + prmFrom + "] --> [" + prmTo + "]";
         return name;
     }
 
-    private void setQuestPetriNet(){
+    private String setName(String prmS){
+        String name = "";
 
-        Increment countP = new Increment();
-        Increment countT = new Increment();
-        Increment countArc = new Increment();
+        if (prmS.equals("A")) {
+            // SET NAME FOR ARC
+            name = "A" + countArc.increment();
 
-        Transition transition;
-        Arc arc;
-        Place place;
+        } else if (prmS.equals("T")) {
+            // SET NAME FOR TRANSITION
+            name = "T" + countTransition.increment();
 
-        // Setup Initial Place
-        place = new Place(placeName("Start", countP.increment()),1);                                                // create Start place
-        quest.add(place);
-
-
-
-
-        for(int c = 0; c < questList.size(); c++){
-
-            //Setup Transition
-            transition = new Transition(transitionName(questList.get(c).getActionName(), countT.increment()));
-            transition.setAction(questList.get(c));
-            quest.add(transition);
-
-            // Setup Arc last P -> Current T
-            arc = new Arc(arcName(countArc.increment(), place.getName(), transition.getName()),place, transition);
-            quest.add(arc);
-
-            //Setup New Place
-            place = new Place(placeName(questList.get(c).getActionName(), countP.increment()),0);
-            quest.add(place);
-
-            //Setup Arc Current T -> New P
-            arc = new Arc(arcName(countArc.increment(), transition.getName(), place.getName()), transition, place);
-            quest.add(arc);
+        }else if (prmS.equals("P")){
+            // SET NAME FOR PLACE
+            name = "P" + countPlace.increment();
+        }else if (prmS.equals("S")){
+            // SET NAME FOR START
+            name = "P" + countPlace.increment() + " - Start";
+        }else if(prmS.equals("E")){
+            //SEt Name For END
+            name = "P" + countPlace.increment() + " - End";
+        }else if(prmS.equals("F")){
+            name = "T" + countTransition.increment() + " - finish quest";
         }
-
-
-
-        Log.d("Quest sQPN", "Set End Place & Transition");
-        //Setup End Transition
-        transition = new Transition(transitionName("End Action" , countT.increment()));
-        transition.setAction(questList.get(questList.size()-1));
-        quest.add(transition);
-
-        // Setup Arc from last Place to End Transition
-        arc = new Arc(arcName(countArc.increment(), place.getName(), transition.getName()),place, transition);
-        quest.add(arc);
-
-        // Setup End Place
-        place = new Place(placeName("End", countP.increment()),0);                                                // create initial place
-        quest.add(place);
-
-        // Setup Arc End Transition to End Place
-        arc = new Arc(arcName(countArc.increment(), transition.getName(), place.getName()),transition, place);
-        quest.add(arc);
-
+        return name;
     }
 
     public void printPetri() {
 
-        Log.d("Quest tP", "---> Places: " + quest.getPlaces().size());
+        Log.d("Quest printPetri", "---> Places: " + quest.getPlaces().size());
         for (int c = 0; c < quest.getPlaces().size(); c++){
-            Log.d("Quest TP", quest.getPlaces().get(c).getName() + "Tokens: " + quest.getPlaces().get(c).getTokens());
+            Log.d("Quest printPetri", quest.getPlaces().get(c).getName() + " Tokens: " + quest.getPlaces().get(c).getTokens());
         }
 
-        Log.d("Quest tP", "---> Transitions: " + quest.getTransitions().size());
+        Log.d("Quest printPetri", "---> Transitions: " + quest.getTransitions().size());
         for (Transition t : quest.getTransitions()){
-            Log.d("Quest tP", t.getName());
+            Log.d("Quest printPetri", t.getName() + " - " + t.getAction().getActionName());
         }
 
-        Log.d("Quest tP", "---> Transitions able to fire: " + quest.getTransitionsAbleToFire().size());
+        Log.d("Quest printPetri", "---> Transitions able to fire: " + quest.getTransitionsAbleToFire().size());
         for (Transition t : quest.getTransitionsAbleToFire()){
-            Log.d("Quest tP", t.getName());
+            Log.d("Quest printPetri", t.getName() +  " - "  + t.getAction().getActionName());
         }
 
-        Log.d("Quest tP", "---> Arcs: " + quest.getArcs().size());
+        Log.d("Quest printPetri", "---> Arcs: " + quest.getArcs().size());
         for (Arc a : quest.getArcs()){
-            Log.d("Quest tP", a.getName());
+
+            if(a.getOrientation().equals("TRANSITION_TO_PLACE")){
+                Log.d("Quest printPetri", a.getName() + " From  " + a.getTransition().getName() + " To " + a.getPlace().getName());
+            }else{
+                Log.d("Quest printPetri", a.getName() + " From  " + a.getPlace().getName() + " To " + a.getTransition().getName());
+            }
+
+
         }
 
 
@@ -1011,6 +1247,7 @@ public class Quest {
 
     public void simulatePetri(){
 
+        Log.d("Quest", "---------> Simulate Petri Net");
         while(quest.getTransitionsAbleToFire().size()>0){
             for(Transition t: quest.getTransitionsAbleToFire()){
                 t.fire();
@@ -1020,6 +1257,32 @@ public class Quest {
 
 
 
+
+    }
+
+    public Petrinet getQuest(){
+        return quest;
+    }
+
+    public ArrayList<Action> getQuestList(){
+        //Log.d("Quest gSOA","Motivation = " + motivationName);
+        //Log.d("Quest gSOA","Strategy = " + strategyName);
+        return questList;
+    }
+
+    public ArrayList<Action> getAbstractList(){
+        return abstractActionList;
+    }
+
+    public void printRewrittenActions(){
+
+        Log.d("Quest", " -----> Print Rewritten Actions ");
+        
+        for(Transition tRa:  quest.getTransitions()){
+            if( tRa.getAction().getIsActionRewritten() ==true ){
+                Log.d("Quest printRewrittenAct", "Transition " + tRa.getName() + " - "  + tRa.getAction().getActionName());
+            }
+        }
 
     }
 

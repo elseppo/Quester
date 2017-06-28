@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.sebastian.clausing.quester.helper.DataBaseHelper;
 import com.sebastian.clausing.quester.R;
+import com.sebastian.clausing.quester.questGen.Action;
 import com.sebastian.clausing.quester.questGen.Quest;
 
 public class GameScreen extends AppCompatActivity {
@@ -60,9 +61,9 @@ public class GameScreen extends AppCompatActivity {
         quest = new Quest();
         String o = "";
 
-        for(int c = 0; c < quest.getQuestList().size(); c++)
+        for(Action a: quest.getAbstractList())
         {
-            o = o + quest.getQuestList().get(c).getActionName() + " ";
+            o = o + a.getActionName() + " ";
         }
         TextView txtVQuestDescription = (TextView) findViewById(R.id.txtV_QuestDescription);
         txtVQuestDescription.setText(o);

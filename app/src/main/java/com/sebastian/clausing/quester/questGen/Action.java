@@ -20,6 +20,7 @@ public class Action {
     private int actionID;       // ID of Action
 
     private boolean rewriteAction;
+    private boolean isActionRewritten = false;
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
@@ -46,7 +47,6 @@ public class Action {
         this.actionName = "End Action";
         this.actionPosition = prmPosition;
     }
-
 
     private void setRewriteAction(int prmID){
         if (prmID == 1 || prmID == 10 || prmID == 11 || prmID == 16 || prmID == 20 || prmID == 21 || prmID == 22
@@ -78,9 +78,20 @@ public class Action {
         return actionPosition;
     }
 
-
     public void openDB(){
         questerDB = dbHelper.getStaticDb();
+    }
+
+    public void setRewriteAction(boolean prmBln){
+        this.rewriteAction = prmBln;
+    }
+
+    public boolean getIsActionRewritten(){
+        return isActionRewritten;
+    }
+
+    public void setIsActionRewritten(boolean prmBln){
+        this.isActionRewritten = prmBln;
     }
 
 }
