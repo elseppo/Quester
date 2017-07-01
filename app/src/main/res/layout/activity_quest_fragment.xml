@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.sebastian.clausing.quester.screens.GameScreen"
+    tools:context="com.sebastian.clausing.quester.screens.FragmentQuest"
     android:background="@color/colorBackground">
 
     <android.support.design.widget.AppBarLayout
@@ -21,7 +21,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_game_screen" />
+    <include layout="@layout/content_quest_fragment" />
 
 
 </android.support.design.widget.CoordinatorLayout>

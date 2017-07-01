@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.sebastian.clausing.quester.screens.GameScreen"
-    tools:showIn="@layout/activity_game_screen"
+    tools:context="com.sebastian.clausing.quester.screens.FragmentQuest"
+    tools:showIn="@layout/activity_quest_fragment"
     tools:layout_editor_absoluteX="0dp"
-    app:layout_constraintBottom_toBottomOf="@+id/textView"
+    app:layout_constraintBottom_toBottomOf="@+id/txtV_action_description"
     android:layout_marginBottom="8dp">
 
 
@@ -47,21 +47,20 @@
         android:layout_marginRight="8dp"
         app:layout_constraintHorizontal_bias="0.506" />
 
-    <Button
-        android:id="@+id/btn_Start_Quest"
-        android:layout_width="150dp"
-        android:layout_height="100dp"
-        android:text="Start Quest"
+    <TextView
+        android:id="@+id/txtV_GoodLuck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Good Luck!"
         android:textColor="@color/colorWhiteText"
-        android:textStyle="bold"
-        android:backgroundTint="@color/colorPrimaryDark"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:textSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9" />
-
-
+        app:layout_constraintVertical_bias="0.65"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintHorizontal_bias="0.506" />
 
 </android.support.constraint.ConstraintLayout>

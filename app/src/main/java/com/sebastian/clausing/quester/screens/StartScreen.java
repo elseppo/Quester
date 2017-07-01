@@ -43,7 +43,7 @@ public class StartScreen extends AppCompatActivity {
 
     private void startQuest(){
 
-        Intent myIntent = new Intent(StartScreen.this, GameScreen.class);
+        Intent myIntent = new Intent(StartScreen.this, QuestScreen.class);
         myIntent.putExtra("key", value); //Optional parameters
         StartScreen.this.startActivity(myIntent);
 

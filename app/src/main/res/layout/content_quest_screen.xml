@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.sebastian.clausing.quester.screens.QuestScreen"
+    tools:showIn="@layout/activity_quest_screen"
+    android:background="@color/colorBackground"
+>
+
+    <FrameLayout
+        android:id="@+id/flFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight=".80"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/flActionContainer"
+        android:layout_width="300dp"
+        android:layout_height="0dp"
+        android:layout_weight=".20"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/flFragmentContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        android:layout_marginBottom="32dp">
+
+        <Button
+            android:id="@+id/btn_next"
+            android:layout_gravity="bottom|right"
+            android:layout_width="120dp"
+            android:layout_height="80dp"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:textColor="@color/colorWhiteText"
+            android:visibility="gone"
+            android:text="Next" />
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="120dp"
+            android:layout_height="80dp"
+            android:layout_gravity="bottom|left"
+            android:textColor="@color/colorWhiteText"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:visibility="gone"
+            android:text="Back" />
+
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_gravity="bottom|center"
+            android:textColor="@color/colorWhiteText"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:visibility="visible"
+            android:text="Start Quest" />
+
+
+
+    </FrameLayout>
+
+
+</android.support.constraint.ConstraintLayout>
