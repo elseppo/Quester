@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sebastian.clausing.quester.R;
+import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
 
@@ -20,6 +21,11 @@ import java.util.ArrayList;
 
 public class FragmentAction extends Fragment {
 
+    //Objects
+    private GameLogic objGameL;
+    private Quest objQuest;
+
+    // UI
     private TextView txtYourQuest;
     private Activity mActivity;
     private String test;
@@ -27,7 +33,7 @@ public class FragmentAction extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d("FragmentAction " , "onCreate");
+        //Log.d("FragmentAction " , "onCreate");
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
@@ -35,7 +41,7 @@ public class FragmentAction extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // CREATE VIEWS HERE
-        Log.d("FragmentAction " , "onCreateView");
+        //Log.d("FragmentAction " , "onCreateView");
         View layout = inflater.inflate(R.layout.content_action_fragment, container, false);
         txtYourQuest = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
         txtYourQuest.setText(test);
@@ -44,7 +50,7 @@ public class FragmentAction extends Fragment {
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d("FragmentAction " , "onActivityCreated");
+        //Log.d("FragmentAction " , "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
 
     }
@@ -53,16 +59,16 @@ public class FragmentAction extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mActivity = (Activity) context;
-        Log.d("FragmentAction " , "onAttach");
+        //Log.d("FragmentAction " , "onAttach");
        }
 
     public void nextAction(Transition prmTransition){
-        Log.d("FragmentAction " , "nextAction");
+        // Log.d("FragmentAction " , "nextAction");
         position++;
 
         if(prmTransition.getAction().getActionName()!=null){
-            test = ("Your " + position + ". action " + " is to:\n "
-                    + prmTransition.getAction().getActionName() + "\n Something");
+            Log.d("FragAction - nextAction", "Current " + prmTransition.getName() + ", Action " + prmTransition.getAction().getActionName());
+            test = (position + ". " + prmTransition.getAction().getActionName() + " " + prmTransition.getAction().getObject().getName());
         }
         else{
             test = "Congratulations! \nYou finished your quest.";
@@ -75,5 +81,10 @@ public class FragmentAction extends Fragment {
             txtYourQuest.setText(test);
         }
 
+    }
+
+    public void setObjects(GameLogic prmGameL, Quest prmQuest){
+        this.objQuest = prmQuest;
+        this.objGameL = prmGameL;
     }
 }

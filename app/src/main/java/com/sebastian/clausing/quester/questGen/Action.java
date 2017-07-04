@@ -3,7 +3,14 @@ package com.sebastian.clausing.quester.questGen;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.sebastian.clausing.quester.game.GameObject;
+import com.sebastian.clausing.quester.game.Item;
+import com.sebastian.clausing.quester.game.Location;
+import com.sebastian.clausing.quester.game.NPC;
+import com.sebastian.clausing.quester.game.Player;
 import com.sebastian.clausing.quester.helper.DataBaseHelper;
+
+import java.util.ArrayList;
 
 /**
  * Created by Sebs-Desktop on 21.06.2017.
@@ -11,24 +18,85 @@ import com.sebastian.clausing.quester.helper.DataBaseHelper;
 
 public class Action {
 
-    private Action left;		//Is used, if action gets rewritten
-    private Action right;		//The normal Action path goes always "right"
-
     private String actionName;
 
     private int actionPosition; // Position in the later quest
     private int actionID;       // ID of Action
 
-    private boolean rewriteAction;
-    private boolean isActionRewritten = false;
+    private boolean rewriteAction;  //Determines, if the action can be rewritten
+    private boolean isActionRewritten = false;  //Determines if the action has been rewritten
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
 
-    //Precondition
-    //Postcondition
+    private ArrayList<Item> arrItemList = new ArrayList<>();
+    private ArrayList<Location> arrLocationList = new ArrayList<>();
+    private ArrayList<NPC> arrNPCList = new ArrayList<>();
+    private ArrayList<Player> arrPlayerList = new ArrayList<>();
 
-    //Konstruktor for Standard Action
+
+    //Sepcial Constructor for rewrite rule 13.
+    public Action(int prmPosition, int prmID, NPC prmNPC, Item prmGiveItem, GameObject prmGetItem){
+        openDB();
+        Cursor c;
+
+        // GET Action NAME
+        c = questerDB.rawQuery("SELECT name FROM Actions WHERE _id = " + prmID + ";", null);
+        c.moveToFirst();
+
+        this.actionName = c.getString(0);
+        this.actionPosition = prmPosition;
+        this.actionID = prmID;
+        setRewriteAction(actionID);
+
+        questerDB.close();
+
+        // SET Objects
+        Item get = (Item) prmGetItem;
+        Item give = prmGiveItem;
+        get.setReceive(true);
+        give.setReceive(false);
+
+        arrNPCList.add(prmNPC);
+        arrItemList.add(get);
+        arrItemList.add(give);
+
+    }
+
+    //Construvtor for Action creation with additional gameobject
+    public Action(int prmPosition, int prmID, GameObject o){
+        openDB();
+        Cursor c;
+
+        // GET ACTION NAME
+        c = questerDB.rawQuery("SELECT name FROM Actions WHERE _id = " + prmID + ";", null);
+        c.moveToFirst();
+
+        this.actionName = c.getString(0);
+        this.actionPosition = prmPosition;
+        this.actionID = prmID;
+        setRewriteAction(actionID);
+        questerDB.close();
+
+        //GET GAME OBJECT
+        if (o instanceof Item) {
+
+            arrItemList.add((Item) o);
+
+        } else if (o instanceof Location) {
+
+            arrLocationList.add((Location) o);
+
+        } else if (o instanceof NPC) {
+
+            arrNPCList.add((NPC) o);
+
+        } else if (o instanceof Player){
+            arrPlayerList.add((Player) o);
+        }
+    }
+
+    //Constructor for upcounting Action with automatic rewrite setting due to ID
     public Action(int prmPosition, int prmID){
         openDB();
         Cursor c;
@@ -43,9 +111,26 @@ public class Action {
         questerDB.close();
     }
 
+    //Konstruktor for Standard Action
     public Action(int prmPosition){
         this.actionName = "End Action";
         this.actionPosition = prmPosition;
+    }
+
+    //Objects an Action can contain
+    public void add(GameObject o) {
+        if (o instanceof Item) {
+            arrItemList.add((Item) o);
+
+        } else if (o instanceof Location) {
+            arrLocationList.add((Location) o);
+
+        } else if (o instanceof NPC) {
+            arrNPCList.add((NPC) o);
+
+        } else if (o instanceof Player){
+            arrPlayerList.add((Player) o);
+        }
     }
 
     private void setRewriteAction(int prmID){
@@ -92,6 +177,24 @@ public class Action {
 
     public void setIsActionRewritten(boolean prmBln){
         this.isActionRewritten = prmBln;
+    }
+
+    public GameObject getObject (){
+
+        if(arrItemList.size() > 0)
+        {
+            return arrItemList.get(0);
+
+        }else if(arrLocationList.size() > 0)
+        {
+            return arrLocationList.get(0);
+
+        }else if(arrNPCList.size()>0)
+         {
+             return arrNPCList.get(0);
+         }
+
+         return null;
     }
 
 }

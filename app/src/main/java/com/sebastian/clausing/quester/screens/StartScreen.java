@@ -35,13 +35,13 @@ public class StartScreen extends AppCompatActivity {
         final Button btnStartQuest = (Button) findViewById(R.id.btn_New_Quest);
         btnStartQuest.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                startQuest();
+                newQuest();
             }
         });
 
     }
 
-    private void startQuest(){
+    private void newQuest(){
 
         Intent myIntent = new Intent(StartScreen.this, QuestScreen.class);
         myIntent.putExtra("key", value); //Optional parameters

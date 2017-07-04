@@ -2,6 +2,7 @@ package com.sebastian.clausing.quester.helper;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,8 +28,8 @@ public class DataBaseHelper {
         }
         else {
             // Check that we have the latest version of the db
-            boolean doUpgrade = false;
-
+            boolean doUpgrade = true;
+            Log.d("DBHelper", "Upgrade DB");
             // Insert your own logic here on whether to upgrade the db; I personally
             // just store the db version # in a text file, but you can do whatever
             // you want.  I've tried MD5 hashing the db before, but that takes a while.

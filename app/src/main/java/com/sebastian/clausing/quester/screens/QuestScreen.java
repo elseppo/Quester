@@ -8,27 +8,29 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.sebastian.clausing.quester.R;
+import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.petriNet.Petrinet;
 import com.sebastian.clausing.quester.petriNet.Transition;
-import com.sebastian.clausing.quester.questGen.Action;
 import com.sebastian.clausing.quester.questGen.Quest;
 
 public class QuestScreen extends FragmentActivity implements FragmentQuest.MessageFlow {
+
+    //Fragments
     private FragmentManager fm = getFragmentManager();
     private FragmentQuest fragmentQuest;
     private FragmentAction fragmentAction;
-    private Quest questOBJ;
-    private Petrinet quest;
     private static final String TAG_FRAGMENT_QUEST = "fragmentQuest";
     private static final String TAG_FRAGMENT_ACTION = "fragmentAction";
 
-    private Button btnNext;
-    private Button btnBack;
-    private Button btnStart;
+    //Objects
+    private GameLogic objGameL = new GameLogic();
+    private Quest objQuest = new Quest(objGameL);
+    private Petrinet pnQuest = objQuest.getQuest();
 
+    //UI
+    private Button btnStart;
 
 
     @Override
@@ -52,46 +54,79 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
             fragmentTransaction.commit();
         }
 
+        fragmentQuest.setObjects(objGameL, objQuest);
+
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStart.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 //Log.d("QuestScreen " , "Button Start Pressed");
-                next();
+                startQuest();
             }
         });
-
     }
 
-    private void next(){
+    private void startQuest(){
 
         Transition nextTransition;
+
         //Check if an entry is in the list
-        if(quest.getTransitionsAbleToFire().size() > 0){
-            nextTransition = quest.getTransitionsAbleToFire().get(0);
+        if(pnQuest.getTransitionsAbleToFire().size() > 0){
+            //Transition is able to fire
 
+            nextTransition = pnQuest.getTransitionsAbleToFire().get(0);
             fragmentAction = (FragmentAction) fm.findFragmentByTag(TAG_FRAGMENT_ACTION);
-            // create the fragment and data the first time
-            if (fragmentAction == null) {
-                Log.d("QuestScreen onCreate" , "create fAction for first time");
-                // add the fragment
-                fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
 
-                fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
-                fragmentTransaction.commit();
+            //But we want only actions, that are NOT REWRITTEN
+            //Rewritten actions are just indirect handled, via the sub-actions
+            if(nextTransition.getAction().getIsActionRewritten() == false)
+            {
 
-                btnStart.setText("NEXT");
+                // create the fragment and data the first time
+                if (fragmentAction == null) {
+                    Log.d("QuestScreen onCreate" , "create FragmentAction for first time");
+                    // add the fragment
+                    fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
+
+                    fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
+                    fragmentTransaction.commit();
+
+                    btnStart.setText("NEXT");
+                    fragmentAction.setObjects(objGameL,objQuest);
+                }
+
+                //Triggers the corresponding activity in fragmentAction, to set the TextView to a value which is stored in nextTransition
+                fragmentAction.nextAction(nextTransition);
+                nextTransition.fire();
+            }
+            else{
+                nextTransition.fire();
+                //Recursive Call of the Method, TO "Step over the rewritten action"
+                startQuest();
             }
 
-            //Triggers the corresponding activity in fragmentAction, to set the TextView to a value which is stored in nextTransition
-            fragmentAction.nextAction(nextTransition);
-            nextTransition.fire();
+
+
+
+
+
+
+
         }
         else{
+            // Create new Quest
+            objQuest = new Quest(objGameL);
+            pnQuest = objQuest.getQuest();
 
+            // Send new Quest to the fragments
+            fragmentQuest.setObjects(objGameL, objQuest);
+            fragmentAction.setObjects(objGameL,objQuest);
+
+            // Change Button back to start
             btnStart.setText("Start Quest");
 
+            // Replace Fragments
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.flFragmentContainer, fragmentQuest);
             fragmentTransaction.commit();
@@ -100,14 +135,11 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
     }
 
 
-    public void setQuest(Quest prmQuestOBJ) {
+    public void message(String prmMessage) {
         // The user selected the headline of an article from the HeadlinesFragment
         // Do something here to display that article
-        questOBJ=prmQuestOBJ;
-        quest = questOBJ.getQuest();
-
-        if(questOBJ.getQuest() !=null){
-            Log.d("QuestScreen " , "Petrinet transmission of '"  + questOBJ.getQuest().getName() +  "' complete.");
+        if(prmMessage!=null){
+            Log.d("QuestScreen " , "Petrinet transmission of '"  +prmMessage+  "' complete.");
         }
         else{
             Log.d("QuestScreen " , "Petrinet transmission failed.");
