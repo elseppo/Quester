@@ -6,8 +6,15 @@ package com.sebastian.clausing.quester.game;
 
 public class Location extends GameObject {
 
-    public Location(int prmInt, String prmString){
-        super(prmInt, prmString);
+    private String type;
+    private int size;
+
+    public Location(int prmID, String prmName, String prmType, int prmX, int prmY, int prmSize){
+        super(prmID, prmName, prmX, prmY);
+
+        this.type = prmType;
+        this.size = prmSize;
+
     }
 
     public Location(){

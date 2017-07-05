@@ -3,7 +3,10 @@ package com.sebastian.clausing.quester.screens;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 
 import com.sebastian.clausing.quester.R;
 import com.sebastian.clausing.quester.game.GameLogic;
+import com.sebastian.clausing.quester.helper.DataBaseHelper;
 import com.sebastian.clausing.quester.questGen.Quest;
 
 public class FragmentQuest extends Fragment {
@@ -44,7 +48,7 @@ public class FragmentQuest extends Fragment {
         txtVQuestStrategy = (TextView) layout.findViewById((R.id.txtV_Strategy));
 
         txtVQuestDescription.setText(objQuest.getAbstractDescription());
-        txtVQuestStrategy.setText("Your quest is to " + objQuest.getStrategyName());
+        txtVQuestStrategy.setText(randomDescription());
 
         //Log.d("FragQuest onCreateView", "mCallback");
         //mCallback.setQuest(objQuest);
@@ -83,6 +87,32 @@ public class FragmentQuest extends Fragment {
 
         this.objQuest = prmQuest;
         this.objGameL = prmGameL;
+    }
+
+    private String randomDescription(){
+        String text = "";
+
+        String giverName = objQuest.getQuestGiver().getName();
+        String home = objQuest.getQuestGiver().getHomeSTRING();
+
+
+        switch((int)  (Math.random() * 2)){
+
+            case 0:
+                text = giverName + " asks you, to " + objQuest.getStrategyName() +  "\n After you finished the quest, return to me at " + home;
+                break;
+
+            case 1:
+                text = "Hey, my name is " + giverName + ". I'd like you to do me a favour. Could you please " + objQuest.getAbstractDescription() + " and than meet me at "+ home;
+                break;
+
+
+
+        }
+
+
+
+        return text;
     }
 
 

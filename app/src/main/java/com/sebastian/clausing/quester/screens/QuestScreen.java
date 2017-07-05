@@ -43,7 +43,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
         fragmentQuest = (FragmentQuest) fm.findFragmentByTag(TAG_FRAGMENT_QUEST);
 
         if (fragmentQuest == null) {
-            // add the fragment
+            // addGameObject the fragment
             Log.d("QuestScreen onCreate" , "create fQuest for first time");
             fragmentQuest = (FragmentQuest) Fragment.instantiate(this, FragmentQuest.class.getName(), null);
             fm.beginTransaction().add(fragmentQuest, TAG_FRAGMENT_QUEST).commit();
@@ -84,7 +84,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
                 // create the fragment and data the first time
                 if (fragmentAction == null) {
                     Log.d("QuestScreen onCreate" , "create FragmentAction for first time");
-                    // add the fragment
+                    // addGameObject the fragment
                     fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
 
                     fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 public class Action {
 
     private String actionName;
+    private String keywords;
+    private int itemuse;
 
     private int actionPosition; // Position in the later quest
     private int actionID;       // ID of Action
@@ -100,12 +102,15 @@ public class Action {
     public Action(int prmPosition, int prmID){
         openDB();
         Cursor c;
-        c = questerDB.rawQuery("SELECT name FROM Actions WHERE _id = " + prmID + ";", null);
+        c = questerDB.rawQuery("SELECT * FROM Actions WHERE _id = " + prmID + ";", null);
         c.moveToFirst();
 
-        this.actionName = c.getString(0);
+        this.actionName = c.getString(1);
         this.actionPosition = prmPosition;
         this.actionID = prmID;
+        this.keywords = c.getString(2);
+        this.itemuse = c.getInt(3);
+
         setRewriteAction(actionID);
 
         questerDB.close();
@@ -118,7 +123,7 @@ public class Action {
     }
 
     //Objects an Action can contain
-    public void add(GameObject o) {
+    public void addGameObject(GameObject o) {
         if (o instanceof Item) {
             arrItemList.add((Item) o);
 
@@ -134,8 +139,8 @@ public class Action {
     }
 
     private void setRewriteAction(int prmID){
-        if (prmID == 1 || prmID == 10 || prmID == 11 || prmID == 16 || prmID == 20 || prmID == 21 || prmID == 22
-                || prmID == 23 || prmID == 24 || prmID == 28) {
+        if (prmID == 1 || prmID == 10 || prmID == 11 || prmID == 16 || prmID == 20 || prmID == 21
+                || prmID == 23 || prmID == 24) { // 28 Quest + 22 Subquest
             rewriteAction = true;
         }
         else{
@@ -179,7 +184,7 @@ public class Action {
         this.isActionRewritten = prmBln;
     }
 
-    public GameObject getObject (){
+    public GameObject getGameObject(){
 
         if(arrItemList.size() > 0)
         {
@@ -195,6 +200,10 @@ public class Action {
          }
 
          return null;
+    }
+
+    public int getItemuse() {
+        return itemuse;
     }
 
 }

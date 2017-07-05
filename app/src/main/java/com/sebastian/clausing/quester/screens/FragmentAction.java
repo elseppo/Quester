@@ -10,14 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sebastian.clausing.quester.R;
 import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
-
-import java.util.ArrayList;
 
 public class FragmentAction extends Fragment {
 
@@ -68,7 +65,7 @@ public class FragmentAction extends Fragment {
 
         if(prmTransition.getAction().getActionName()!=null){
             Log.d("FragAction - nextAction", "Current " + prmTransition.getName() + ", Action " + prmTransition.getAction().getActionName());
-            test = (position + ". " + prmTransition.getAction().getActionName() + " " + prmTransition.getAction().getObject().getName());
+            test = (position + ". " + prmTransition.getAction().getActionName() + " " + prmTransition.getAction().getGameObject().getName());
         }
         else{
             test = "Congratulations! \nYou finished your quest.";

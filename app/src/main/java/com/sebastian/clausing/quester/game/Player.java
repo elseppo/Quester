@@ -13,7 +13,6 @@ public class Player extends GameObject {
     private int reputation;
 
     public Player(int prmInt, String prmString){
-        super(prmInt, prmString);
     }
 
 }

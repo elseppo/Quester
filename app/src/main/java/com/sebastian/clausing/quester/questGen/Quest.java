@@ -2,14 +2,12 @@ package com.sebastian.clausing.quester.questGen;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.util.Log;
 
 
 import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.game.GameObject;
 import com.sebastian.clausing.quester.game.Item;
-import com.sebastian.clausing.quester.game.Location;
 import com.sebastian.clausing.quester.game.NPC;
 import com.sebastian.clausing.quester.helper.DataBaseHelper;
 import com.sebastian.clausing.quester.helper.Increment;
@@ -36,7 +34,6 @@ public class Quest {
     private boolean doSplitMerge = true;
     boolean foundRewritableAction;
 
-
     //Lists
     private ArrayList<Integer> abstractQuestList = new ArrayList<Integer>();
     private ArrayList<Integer> appliedRulesList = new ArrayList<>();
@@ -48,6 +45,8 @@ public class Quest {
     private String strategyName;
     private String motivationName;
     private String strategySequence;
+
+    private NPC questGiver;
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
@@ -61,6 +60,7 @@ public class Quest {
     public Quest(GameLogic prmGame){
 
         this.game = prmGame;
+        this.questGiver = game.getNPC();
 
         Log.d("Quest", "--- NEW QUEST -------------------------------------------------");
 
@@ -74,6 +74,7 @@ public class Quest {
         //  2. Apply the rule to that transition
         //  3. Add that rewritten Transitions to the Petrinet
         //  As long as there are rewritable actions, do
+        //Do the Method as long as there are no more rewritable transitions
 
         while(doSplitMerge == true){
 
@@ -93,6 +94,7 @@ public class Quest {
             {
                 doSplitMerge = false;
             }
+
         }
 
         //After this Method the quest is fully generated and rules are applied.
@@ -110,7 +112,7 @@ public class Quest {
         motivationID=(int) (Math.random()* totalMotivations); // Possible Outcomes from 0 to (totalMotivations -1)
     }
 
-    private void determineStrategy(String prmMotivation){
+    private void determineStrategy(String prmMotivation) {
 
         // Variables
         motivationName = prmMotivation;
@@ -122,15 +124,15 @@ public class Quest {
         questerDB = dbHelper.getStaticDb();
 
         // Determine how many Strategies the Motivation has
-        c = questerDB.rawQuery("SELECT Count(*) FROM " + motivationName+";", null);
+        c = questerDB.rawQuery("SELECT Count(*) FROM " + motivationName + ";", null);
         c.moveToFirst();
         totalStrategies = c.getInt(0);
 
         //Determine a random Strategy
-        strategyID =  (int) (Math.random() * totalStrategies); // Possible Outcomes from 0 to (totalStrategies -1)
+        strategyID = (int) (Math.random() * totalStrategies); // Possible Outcomes from 0 to (totalStrategies -1)
 
         //Set Strategy Name and strategy sequence
-        c = questerDB.rawQuery("SELECT * FROM " + "'"+motivationName +"'"+  "WHERE _id =  " +"'"+ strategyID +"';" , null);
+        c = questerDB.rawQuery("SELECT * FROM " + "'" + motivationName + "'" + "WHERE _id =  " + "'" + strategyID + "';", null);
         c.moveToFirst();
         strategyName = c.getString(1);
         strategySequence = c.getString(2);
@@ -141,16 +143,34 @@ public class Quest {
         // Determine the sequence of actions and put them into a integer list
         String sequence[] = strategySequence.split(",");
 
-        for(String s:sequence){
+        for (String s : sequence) {
             abstractQuestList.add(Integer.parseInt(s));
         }
 
         //Get a Strategy
         String strategy[] = strategyName.split(";");
-        strategyName = strategy[(int) (Math.random() * (strategy.length-1))];
+        strategyName = strategy[(int) (Math.random() * (strategy.length - 1))];
 
         Log.d("Quest", "---------> Close DB");
         questerDB.close();
+
+
+        // Fill questListAbstract with Actions
+        for (int c1 = 0; c1 < abstractQuestList.size(); c1++) {
+            questListAbstract.add(new Action(countAction.increment(), abstractQuestList.get(c1)));
+        }
+
+        //For all abstract quests, where the Quest giver is needed in a later Action
+        //Set the quest giver at this point to the last action.
+        if (     motivationID == 0 ||
+                 motivationID == 1 ||
+                 motivationID == 2 ||
+                (motivationID == 3 && strategyID != 0) ||
+                (motivationID == 4 && strategyID == 0) ||
+                (motivationID == 5 && strategyID == 1) ||
+                (motivationID == 8 && strategyID == 1)) {
+            questListAbstract.get(questListAbstract.size() - 1).addGameObject(questGiver);
+        }
 
     }
 
@@ -206,15 +226,14 @@ public class Quest {
                 break;
         }
 
-        // Fill questListAbstract with Actions
-        for(int c = 0; c < abstractQuestList.size(); c++){
-            questListAbstract.add(new Action(countAction.increment(), abstractQuestList.get(c)));
-        }
-
         //Set game objects
+        Log.d("Giver", questGiver.getName());
+
         for(Action a: questListAbstract){
-            setGameObjects(a);
-            Log.d("Set Game Object", a.getActionName() + " " + a.getObject());
+
+            if(a.getGameObject()==null){
+                setGameObjects(a);
+                            }
         }
     }
 
@@ -290,7 +309,7 @@ public class Quest {
         Log.d("Quest applyRules: " , "-----> Check " + prmTSplit.getName() + " Action: " + prmTSplit.getAction().getActionName());
 
         int c = prmTSplit.getAction().getActionID();
-        GameObject gOBJ = prmTSplit.getAction().getObject();
+        GameObject gOBJ = prmTSplit.getAction().getGameObject();
         // For each action ID, there are several Rules how to rewrite them
 
         switch (c) {
@@ -637,38 +656,43 @@ public class Quest {
 
         if(id == 6 || id == 8 || id == 13 || id == 14 || id == 19 || id == 20 || id == 29){
             // experiment, gather, read, repair, use, get, <get>
-            prmAction.add(game.getItem());
+
+            Log.d("GameLQ",  "Action: " + prmAction.getActionName() + " Itemuse " + prmAction.getItemuse());
+            prmAction.addGameObject(game.getItem(prmAction.getItemuse()));
+
         }else if (id == 7 || id == 10 || id == 25 || id == 23 || id == 30 || id == 21){
             // explore, goto, learn, <goto> <learn> <steal>
-            prmAction.add(game.getLocation());
+            prmAction.addGameObject(game.getLocation());
+
         }else if (id == 4 || id == 1 || id == 11 || id == 12 || id == 15 || id == 17 || id == 26 || id == 24 ){
             // CAPTURE ESCORT KILL  LISTEN  REPORT STEALTH <kill> <capture>
-            prmAction.add(game.getNPC());
+            prmAction.addGameObject(game.getNPC());
+
         }else if(id == 16 || id == 27){
             //SPY
             switch((int)(Math.random()*2)){
                 case 0:
-                    prmAction.add(game.getLocation());
+                    prmAction.addGameObject(game.getLocation());
                     break;
                 case 1:
-                    prmAction.add(game.getNPC());
+                    prmAction.addGameObject(game.getNPC());
                     break;
             }
         }else if(id == 5 || id == 9 || id == 18){
             // exchange, give, take
-            prmAction.add(game.getNPC());
-            prmAction.add(game.getItem());
+            prmAction.addGameObject(game.getNPC());
+            prmAction.addGameObject(game.getItem());
         }else if(id == 2 || id == 3){
             // Damage, defend
             switch((int)(Math.random()*3)){
                 case 0:
-                    prmAction.add(game.getLocation());
+                    prmAction.addGameObject(game.getLocation());
                     break;
                 case 1:
-                    prmAction.add(game.getNPC());
+                    prmAction.addGameObject(game.getNPC());
                     break;
                 case 2:
-                    prmAction.add(game.getItem());
+                    prmAction.addGameObject(game.getItem());
                     break;
             }
         }
@@ -748,6 +772,20 @@ public class Quest {
 
     public String getStrategyName(){
         return strategyName;
+    }
+
+    public NPC getQuestGiver(){
+        return questGiver;
+    }
+
+    public String getDialogue(){
+
+        String qgName = questGiver.getName();
+        String qgHome = questGiver.getHomeSTRING();
+
+
+
+        return qgName;
     }
 
 }

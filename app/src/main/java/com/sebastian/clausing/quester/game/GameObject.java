@@ -7,17 +7,20 @@ package com.sebastian.clausing.quester.game;
 public class GameObject {
 
     private String name;
-    private Location location;
     private int id;
+    private int x;
+    private int y;
 
     public GameObject(){
 
     }
 
-    public GameObject(int prmID, String prmName){
+    public GameObject(int prmID, String prmName, int prmX, int prmY){
 
         this.id = prmID;
         this.name = prmName;
+        this.x = prmX;
+        this.y =prmY;
 
     }
 
