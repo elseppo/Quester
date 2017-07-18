@@ -16,6 +16,8 @@ import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
 
+import static android.support.v4.content.ContextCompat.getColor;
+
 public class FragmentAction extends Fragment {
 
     //Objects
@@ -23,9 +25,12 @@ public class FragmentAction extends Fragment {
     private Quest objQuest;
 
     // UI
-    private TextView txtYourQuest;
+    private TextView txtActionStep;
+    private TextView txtActionDescription;
     private Activity mActivity;
-    private String test;
+    private Context mContext;
+    private String actionStep;
+    private String actionDescription;
     private int position = 0;
 
     @Override
@@ -40,8 +45,10 @@ public class FragmentAction extends Fragment {
         // CREATE VIEWS HERE
         //Log.d("FragmentAction " , "onCreateView");
         View layout = inflater.inflate(R.layout.content_action_fragment, container, false);
-        txtYourQuest = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
-        txtYourQuest.setText(test);
+        txtActionStep = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
+        txtActionDescription = (TextView) layout.findViewById(R.id.txtV_action_description);
+        txtActionStep.setText(actionStep);
+        txtActionDescription.setText(actionDescription);
         return layout;
     }
 
@@ -56,6 +63,7 @@ public class FragmentAction extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mActivity = (Activity) context;
+        mContext = context;
         //Log.d("FragmentAction " , "onAttach");
        }
 
@@ -63,19 +71,28 @@ public class FragmentAction extends Fragment {
         // Log.d("FragmentAction " , "nextAction");
         position++;
 
+        Log.d("NextTransition", prmTransition.getName() + " Action: " + prmTransition.getAction().getActionName() + " Object: " + prmTransition.getAction().getGameObject().getName());
+
+
         if(prmTransition.getAction().getActionName()!=null){
-            Log.d("FragAction - nextAction", "Current " + prmTransition.getName() + ", Action " + prmTransition.getAction().getActionName());
-            test = (position + ". " + prmTransition.getAction().getActionName() + " " + prmTransition.getAction().getGameObject().getName());
+            Log.d("FragAction - nextAction", "Current " + prmTransition.getName() + ", Action " + prmTransition.getAction().getDescription());
+            actionStep = (position + ". " + prmTransition.getAction().getDescription());
+            actionDescription = prmTransition.getAction().getActionName();
         }
         else{
-            test = "Congratulations! \nYou finished your quest.";
+            actionStep = "Congratulations! \nYou finished your quest.";
         }
 
         if(mActivity!=null){
             FrameLayout container = (FrameLayout) mActivity.findViewById(R.id.flFragmentContainer);
             LayoutInflater.from(getActivity())
                     .inflate(R.layout.content_action_fragment, container, false);
-            txtYourQuest.setText(test);
+            txtActionStep.setText(actionStep);
+            txtActionDescription.setText(actionDescription);
+        }
+
+        if(prmTransition.getAction().getIsActionRewritten() == true){
+            actionStep = actionStep + " Applied Rule";
         }
 
     }

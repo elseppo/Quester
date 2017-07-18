@@ -2,7 +2,6 @@ package com.sebastian.clausing.quester.game;
 
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -13,16 +12,12 @@ public class Item extends GameObject {
 
     private Itemtype type;
 
-    private boolean receive;
-
+    private boolean receiveFromNPC = false;
+    private boolean giveToNPC = false;
 
 
     public Item(int prmID, String prmName, int prmType, int prmX, int prmY, ArrayList<Itemtype> prmItemTypeArray){
         super(prmID, prmName, prmX, prmY);
-
-        //Log.d("GameLQ Item","prmName " + prmName);
-       // Log.d("GameLQ Item","prmType  " + prmType);
-
 
         for (Itemtype i : prmItemTypeArray){
            // Log.d("GameLQ Item","For " + i.getName() + " ceck if i.id " +i.getId() + " equals " + prmType);
@@ -31,22 +26,39 @@ public class Item extends GameObject {
                 this.type = i;
             }
         }
+
+        Log.d("GameLQ Item","Created new ITEM: ---");
+        Log.d("GameLQ Item","Name: " + this.getName() + " of Type " + type.getName());
+        Log.d("GameLQ Item","Used for: ");
+
+        for (Integer i :type.getItemusesList()) {
+            Log.d("GameLQ Item" , "  "+ i);
+        }
+
     }
 
     public Item(){
 
     }
 
-    public boolean isReceive() {
-        return receive;
+    public boolean isReceiveFromNPC() {
+        return receiveFromNPC;
     }
 
-    public void setReceive(boolean receive) {
-        this.receive = receive;
+    public void setReceiveFromNPC(boolean receiveFromNPC) {
+        this.receiveFromNPC = receiveFromNPC;
     }
 
     public Itemtype getType() {
         return type;
+    }
+
+    public void setGiveToNPC(boolean prmBoolean){
+        giveToNPC = prmBoolean;
+    }
+
+    public boolean isGiveToNPC(){
+        return giveToNPC;
     }
 
 }

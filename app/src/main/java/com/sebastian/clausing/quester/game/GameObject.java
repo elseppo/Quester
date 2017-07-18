@@ -15,10 +15,13 @@ public class GameObject {
 
     }
 
+
+
     public GameObject(int prmID, String prmName, int prmX, int prmY){
 
         this.id = prmID;
         this.name = prmName;
+
         this.x = prmX;
         this.y =prmY;
 
@@ -38,5 +41,21 @@ public class GameObject {
 
     public void setID(int ID) {
         this.id = ID;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setX( int prmX){
+        this.x = prmX;
+    }
+
+    public void setY( int prmY){
+        this.y = prmY;
     }
 }

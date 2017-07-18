@@ -1,5 +1,7 @@
 package com.sebastian.clausing.quester.petriNet;
 
+import android.util.Log;
+
 import com.sebastian.clausing.quester.questGen.Action;
 
 import java.util.ArrayList;
@@ -8,13 +10,21 @@ import java.util.List;
 public class Transition
 extends PetrinetObject{
 
+    private List<Arc> incoming = new ArrayList<Arc>();
+    private List<Arc> outgoing = new ArrayList<Arc>();
+    private Action action;
+    private boolean split = false;
+    private boolean merge = false;
+    private int depth = 0;
+
     public Transition(String name) {
         super(name);
     }
 
-    private List<Arc> incoming = new ArrayList<Arc>();
-    private List<Arc> outgoing = new ArrayList<Arc>();
-    private Action action;
+    public Transition(String name, int prmDepth) {
+        super(name);
+        this.depth = prmDepth;
+    }
 
     public void setAction(Action prmAction){
         this.action = prmAction;
@@ -49,6 +59,10 @@ extends PetrinetObject{
      * Transition soll feuern
      */
     public void fire() {
+
+        Log.d("Transition","Fire: " + getName());
+
+
         for (Arc arc : incoming) {
             arc.fire();
         }
@@ -56,6 +70,7 @@ extends PetrinetObject{
         for (Arc arc : outgoing) {
             arc.fire();
         }
+
     }
     
     /**
@@ -85,5 +100,29 @@ extends PetrinetObject{
                (isNotConnected() ? " IS NOT CONNECTED" : "" ) +
                (canFire()? " READY TO FIRE" : "");
     }
-    
+
+    public void setSplit(boolean prmType){
+        this.split = prmType;
+    }
+
+    public void setMerge(boolean prmType){
+        this.merge = prmType;
+    }
+
+    public boolean isSplit(){
+        return this.split;
+    }
+
+    public boolean isMerge(){
+        return this.merge;
+    }
+
+    public int getDepth(){
+        return this.depth;
+    }
+
+    public void setDepth(Integer prmDepth){
+        this.depth = prmDepth;
+    }
+
 }

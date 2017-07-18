@@ -71,46 +71,31 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
 
         //Check if an entry is in the list
         if(pnQuest.getTransitionsAbleToFire().size() > 0){
-            //Transition is able to fire
+            //One Transition is able to fire
 
+            //We always just have one which is able to fire
             nextTransition = pnQuest.getTransitionsAbleToFire().get(0);
             fragmentAction = (FragmentAction) fm.findFragmentByTag(TAG_FRAGMENT_ACTION);
 
-            //But we want only actions, that are NOT REWRITTEN
-            //Rewritten actions are just indirect handled, via the sub-actions
-            if(nextTransition.getAction().getIsActionRewritten() == false)
-            {
+            // create the fragment and data the first time
+            if (fragmentAction == null) {
+                Log.d("QuestScreen onCreate" , "create FragmentAction for first time");
+                // addGameObject the fragment
+                fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
 
-                // create the fragment and data the first time
-                if (fragmentAction == null) {
-                    Log.d("QuestScreen onCreate" , "create FragmentAction for first time");
-                    // addGameObject the fragment
-                    fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
+                fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
+                fragmentTransaction.commit();
 
-                    fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
-                    fragmentTransaction.commit();
-
-                    btnStart.setText("NEXT");
-                    fragmentAction.setObjects(objGameL,objQuest);
-                }
-
-                //Triggers the corresponding activity in fragmentAction, to set the TextView to a value which is stored in nextTransition
-                fragmentAction.nextAction(nextTransition);
-                nextTransition.fire();
-            }
-            else{
-                nextTransition.fire();
-                //Recursive Call of the Method, TO "Step over the rewritten action"
-                startQuest();
+                btnStart.setText("NEXT");
+                fragmentAction.setObjects(objGameL,objQuest);
             }
 
-
-
-
-
-
+            //Triggers the corresponding activity in fragmentAction, to set the TextView to a value which is stored in nextTransition
+            Log.d("NextTransition", nextTransition.getName() + " Action: " + nextTransition.getAction().getActionName() + " Object: " + nextTransition.getAction().getGameObject().getName());
+            fragmentAction.nextAction(nextTransition);
+            nextTransition.fire();
 
 
         }

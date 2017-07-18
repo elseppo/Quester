@@ -31,6 +31,10 @@ public class FragmentQuest extends Fragment {
     //UI
     private TextView txtVQuestDescription;
     private TextView txtVQuestStrategy;
+    private TextView txtVQuestMotivation;
+    private TextView txtVQuestGiver;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,11 +48,15 @@ public class FragmentQuest extends Fragment {
         // CREATE VIEWS HERE
 
         View layout = inflater.inflate(R.layout.content_quest_fragment, null);
+        txtVQuestStrategy = (TextView) layout.findViewById(R.id.txtV_Strategy);
         txtVQuestDescription = (TextView) layout.findViewById(R.id.txtV_QuestDescription);
-        txtVQuestStrategy = (TextView) layout.findViewById((R.id.txtV_Strategy));
+        txtVQuestMotivation = (TextView) layout.findViewById(R.id.txtV_Motivation);
+        txtVQuestGiver = (TextView) layout.findViewById(R.id.txtV_QuestGiver);
 
+        txtVQuestGiver.setText("Quest Giver: " + objQuest.getQuestGiver().getName() + " (lives in " + objGameL.getLocation(objQuest.getQuestGiver()).getName() + ")");
+        txtVQuestMotivation.setText("Motivation: " + objQuest.getMotivationName());
+        txtVQuestStrategy.setText("Strategy: "+ objQuest.getStrategyName());
         txtVQuestDescription.setText(objQuest.getAbstractDescription());
-        txtVQuestStrategy.setText(randomDescription());
 
         //Log.d("FragQuest onCreateView", "mCallback");
         //mCallback.setQuest(objQuest);
@@ -89,31 +97,6 @@ public class FragmentQuest extends Fragment {
         this.objGameL = prmGameL;
     }
 
-    private String randomDescription(){
-        String text = "";
-
-        String giverName = objQuest.getQuestGiver().getName();
-        String home = objQuest.getQuestGiver().getHomeSTRING();
-
-
-        switch((int)  (Math.random() * 2)){
-
-            case 0:
-                text = giverName + " asks you, to " + objQuest.getStrategyName() +  "\n After you finished the quest, return to me at " + home;
-                break;
-
-            case 1:
-                text = "Hey, my name is " + giverName + ". I'd like you to do me a favour. Could you please " + objQuest.getAbstractDescription() + " and than meet me at "+ home;
-                break;
-
-
-
-        }
-
-
-
-        return text;
-    }
 
 
 

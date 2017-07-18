@@ -14,41 +14,40 @@ public class NPC extends GameObject {
     private boolean adult;
     private boolean male;
     private int home;
+    private boolean captured = false;
 
 
-    public NPC(int prmID, String prmName, int prmAdult, int prmMale, int prmX, int prmY, int prmHome){
+    public NPC(int prmID, String prmName, int prmAdult, int prmMale, int prmX, int prmY, int prmHome) {
         super(prmID, prmName, prmX, prmY);
 
-        if(prmAdult == 1){
+        if (prmAdult == 1) {
             adult = true;
-        }
-        else{
+        } else {
             adult = false;
         }
 
-        if(prmMale == 1){
+        if (prmMale == 1) {
             male = true;
-        }
-        else{
+        } else {
             male = false;
         }
 
         this.home = prmHome;
     }
 
-    public NPC(){
+    public NPC() {
 
     }
 
-    public int getHomeINT(){
+    public int getHomeINT() {
         return home;
     }
 
-    public String getHomeSTRING(){
+    public String getHomeSTRING() {
 
         DataBaseHelper myDBHelper = new DataBaseHelper();
         SQLiteDatabase questerDB = myDBHelper.getStaticDb();
-        Cursor c = questerDB.rawQuery("SELECT name FROM Locations WHERE _id = "+ "'"+home+"'" +";", null);
+        Cursor c = questerDB.rawQuery("SELECT name FROM Locations WHERE _id = " + "'" + home + "'" + ";", null);
         c.moveToFirst();
         String home = c.getString(0);
         questerDB.close();
@@ -56,7 +55,12 @@ public class NPC extends GameObject {
         return home;
     }
 
+    public boolean isCaptured() {
+        return captured;
+    }
 
-
+    public void setCaptured(boolean prmCaptured) {
+        this.captured = prmCaptured;
+    }
 
 }

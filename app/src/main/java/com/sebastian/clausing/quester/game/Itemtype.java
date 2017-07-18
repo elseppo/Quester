@@ -23,7 +23,7 @@ public class Itemtype {
         String entries[] = itemuses.split(",");
         for(String s : entries){
             itemusesList.add(Integer.valueOf(s));
-            Log.d("TEST",prmName + " "+s);
+            //Log.d("TEST",prmName + " "+s);
         }
 
     }
