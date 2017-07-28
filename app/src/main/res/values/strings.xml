@@ -4,6 +4,7 @@
     <string name="title_activity_play_screen">PlayScreen</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="QUEST_OBJ">QUEST_OBJ</string>
+    <string name="QuestScreen_Title">Quest Screen</string>
 
 
 </resources>

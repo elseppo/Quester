@@ -47,6 +47,7 @@ public class FragmentAction extends Fragment {
         View layout = inflater.inflate(R.layout.content_action_fragment, container, false);
         txtActionStep = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
         txtActionDescription = (TextView) layout.findViewById(R.id.txtV_action_description);
+
         txtActionStep.setText(actionStep);
         txtActionDescription.setText(actionDescription);
         return layout;
@@ -77,7 +78,21 @@ public class FragmentAction extends Fragment {
         if(prmTransition.getAction().getActionName()!=null){
             Log.d("FragAction - nextAction", "Current " + prmTransition.getName() + ", Action " + prmTransition.getAction().getDescription());
             actionStep = (position + ". " + prmTransition.getAction().getDescription());
-            actionDescription = prmTransition.getAction().getActionName();
+
+            //IF Transitions has Subtasksk, i.e has been rewritten
+            if(prmTransition.getChilds().size()>0){
+                actionDescription = "Subtasks: \n \n";
+                int c = 1;
+                for(Transition t : prmTransition.getChilds()){
+                    actionDescription = actionDescription + " " + c +". " + t.getAction().getDescription() + "\n";
+                    c++;
+                }
+            }else{
+                actionDescription = "No Subtasks";
+            }
+
+
+
         }
         else{
             actionStep = "Congratulations! \nYou finished your quest.";

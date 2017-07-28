@@ -27,13 +27,13 @@ public class Item extends GameObject {
             }
         }
 
-        Log.d("GameLQ Item","Created new ITEM: ---");
-        Log.d("GameLQ Item","Name: " + this.getName() + " of Type " + type.getName());
-        Log.d("GameLQ Item","Used for: ");
+        //Log.d("GameLQ Item","Created new ITEM: ---");
+        //Log.d("GameLQ Item","Name: " + this.getName() + " of Type " + type.getName());
+        //Log.d("GameLQ Item","Used for: ");
 
-        for (Integer i :type.getItemusesList()) {
-            Log.d("GameLQ Item" , "  "+ i);
-        }
+        //for (Integer i :type.getItemusesList()) {
+         //   Log.d("GameLQ Item" , "  "+ i);
+       // }
 
     }
 

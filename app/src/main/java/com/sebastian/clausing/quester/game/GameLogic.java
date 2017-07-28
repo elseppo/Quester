@@ -33,7 +33,7 @@ public class GameLogic {
         c.move(-1);
 
         while(c.moveToNext()){
-            Log.d("GameL","while Itemtype id " + c.getInt(0) );
+            //Log.d("GameL","while Itemtype id " + c.getInt(0) );
             arrItemtypeList.add(new Itemtype(c.getInt(0),c.getString(1),c.getString(2)));
         }
 
@@ -116,7 +116,7 @@ public class GameLogic {
 
 
         Item rItem = specificItems.get((int) (Math.random()*specificItems.size()));
-        Log.d("GameL", "Returned Item: " + rItem.getName() + "ITEMUSE: " + rItem.getType().getItemuses());
+        //Log.d("GameL", "Returned Item: " + rItem.getName() + "ITEMUSE: " + rItem.getType().getItemuses());
 
         return rItem;
     }
@@ -126,9 +126,14 @@ public class GameLogic {
         return arrLocationList.get((int) (Math.random()*arrLocationList.size()));
     }
 
+    public Location getLocation(int prmInt){
+        //returns Location
+        return arrLocationList.get(prmInt-1);
+    }
+
     public Location getLocation(GameObject prmGO){
 
-        Log.d("Dist Test","On Object: " + prmGO.getName());
+        //Log.d("Dist Test","On Object: " + prmGO.getName());
 
         int x1 = prmGO.getX();
         int y1 = prmGO.getY();
@@ -136,8 +141,8 @@ public class GameLogic {
         int y2;
         double currentDistance;
 
-        Log.d("Dist Test","x1: " + x1);
-        Log.d("Dist Test","y1: " + y1);
+        //Log.d("Dist Test","x1: " + x1);
+        //Log.d("Dist Test","y1: " + y1);
 
         double nearestDistance = -1;
         Location nearestLocation = null;
@@ -183,7 +188,7 @@ public class GameLogic {
 
     public Item getPlaceholder(){
 
-        Item placeholder = arrItemList.get((int) (Math.random()*arrItemList.size()));
+        Item placeholder = new Item();
         placeholder.setName("Placeholder");
         return placeholder;
     }

@@ -10,12 +10,16 @@ import java.util.List;
 public class Transition
 extends PetrinetObject{
 
+    //Regarding PetriNet
     private List<Arc> incoming = new ArrayList<Arc>();
     private List<Arc> outgoing = new ArrayList<Arc>();
+
+    //Regarding Quest Logic
     private Action action;
     private boolean split = false;
     private boolean merge = false;
     private int depth = 0;
+    private ArrayList<Transition> childs = new ArrayList<>();
 
     public Transition(String name) {
         super(name);
@@ -123,6 +127,14 @@ extends PetrinetObject{
 
     public void setDepth(Integer prmDepth){
         this.depth = prmDepth;
+    }
+
+    public void addChild(Transition prmChild){
+        childs.add(prmChild);
+    }
+
+    public ArrayList<Transition> getChilds(){
+        return this.childs;
     }
 
 }

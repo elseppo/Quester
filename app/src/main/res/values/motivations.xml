@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="motivations_array">
+        <item>Random</item>
+        <item>Knowledge</item>
+        <item>Comfort</item>
+        <item>Reputation</item>
+        <item>Serenity</item>
+        <item>Protection</item>
+        <item>Conquest</item>
+        <item>Wealth</item>
+        <item>Ability</item>
+        <item>Equipment</item>
+    </string-array>
+</resources>

@@ -23,6 +23,7 @@ public class Action {
     private String keywords;
     private int itemuse;
     private String description;
+    private String add = "";
 
     private int actionPosition; // Position in the later quest
     private int actionID;       // ID of Action
@@ -272,11 +273,11 @@ public class Action {
 
     public void setDescription() {
 
-        Log.d("SetDescription", "Action: " + getActionID());
-        Log.d("SetDescription", "Game Object: " + getGameObject().getName());
+        //Log.d("SetDescription", "Action: " + getActionID());
+        //Log.d("SetDescription", "Game Object: " + getGameObject().getName());
 
         String str = getKeyword();
-        Log.d("SetDescription", "keyword " + str);
+        //Log.d("SetDescription", "keyword " + str);
 
 
         NPC capturedNPC = null;
@@ -295,18 +296,18 @@ public class Action {
             String part1;
 
             String entries[] = str.split("ITEM");
-            Log.d("SetDescription", "E0 " + entries[0]);
-            Log.d("SetDescription", "Capured NPC " + capturedNPC.getName());
-            Log.d("SetDescription", "Normal NPC " + normalNPC.getName());
+            //Log.d("SetDescription", "E0 " + entries[0]);
+            //Log.d("SetDescription", "Capured NPC " + capturedNPC.getName());
+            //Log.d("SetDescription", "Normal NPC " + normalNPC.getName());
 
-            Log.d("SetDescription", "E1" + entries[1]);
+            //Log.d("SetDescription", "E1" + entries[1]);
             part1 = entries[0] + capturedNPC.getName() + entries[1];
 
             String entries2[] = part1.split("NPC");
             description = entries2[0] + normalNPC.getName();
 
-            Log.d("SetDescription", "part1" + part1);
-            Log.d("SetDescription", "description: " + description);
+           // Log.d("SetDescription", "part1" + part1);
+            //Log.d("SetDescription", "description: " + description);
         }
         //Actions: exchange, give, <give>
         else if (actionID == 5 || actionID == 9 || actionID == 31) {
@@ -314,20 +315,20 @@ public class Action {
             String part1;
 
             String entries[] = str.split("ITEM");
-            Log.d("SetDescription", "E0 " + entries[0]);
-            Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
-            Log.d("SetDescription", "Item " + arrItemList.get(0).getName());
+            //Log.d("SetDescription", "E0 " + entries[0]);
+            //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+            //Log.d("SetDescription", "Item " + arrItemList.get(0).getName());
 
-            Log.d("SetDescription", "E1" + entries[1]);
+            //Log.d("SetDescription", "E1" + entries[1]);
             part1 = entries[0] + arrItemList.get(0).getName() + entries[1];
 
             String entries2[] = part1.split("NPC");
-            Log.d("SetDescription", "E0 " + entries2[0]);
-            Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+            //Log.d("SetDescription", "E0 " + entries2[0]);
+            //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
             description = entries2[0] + arrNPCList.get(0).getName();
 
-            Log.d("SetDescription", "part1" + part1);
-            Log.d("SetDescription", "description: " + description);
+            //Log.d("SetDescription", "part1" + part1);
+            //Log.d("SetDescription", "description: " + description);
 
         }
         // Special Case, if Action "use" is used to capture criminal
@@ -336,30 +337,37 @@ public class Action {
                 description = " capture " + arrNPCList.get(0).getName() + " with " + arrItemList.get(0).getName();
             }
             description = str + " " + getGameObject().getName();
-            Log.d("SetDescription", description);
+            //Log.d("SetDescription", description);
+        }
+
+        //STEAL Sth FROM  someone
+        else if(actionID == 21){
+            description = str + " " + getGameObject().getName() + " from " + getNPC(0).getName();
+           // Log.d("SetDescription", "Steal " + description);
         }
         // All other cases with the Term ITEM in
         else if (str.contains("ITEM")) {
             String entries[] = str.split("ITEM");
-            Log.d("SetDescription", "E0 " + entries[0]);
-            Log.d("SetDescription", "GO " + getGameObject().getName());
-            Log.d("SetDescription", "E1" + entries[1]);
+           // Log.d("SetDescription", "E0 " + entries[0]);
+            //Log.d("SetDescription", "GO " + getGameObject().getName());
+           // Log.d("SetDescription", "E1" + entries[1]);
 
             description = entries[0] + getGameObject().getName() + entries[1];
-            Log.d("SetDescription", description);
+            //Log.d("SetDescription", description);
 
         }
         // All other cases, without the Term ITEM
         else {
             description = str + " " + getGameObject().getName();
 
-            Log.d("SetDescription", description);
+            //Log.d("SetDescription", description);
         }
+
+        description = description + add;
 
         //String s1 = description.substring(0, 1).toUpperCase();
         //String CaPdescription = s1 + description.substring(1);
         //description = CaPdescription;
-
     }
 
     public String getDescription(){
@@ -370,6 +378,9 @@ public class Action {
         return arrItemList.get(c);
     }
 
+    public void setDescriptionAdd(String prmAdd){
+        this.add = prmAdd;
+    }
     public NPC getNPC(Integer c){
         return arrNPCList.get(c);
     }

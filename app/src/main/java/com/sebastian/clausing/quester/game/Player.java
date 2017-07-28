@@ -83,6 +83,18 @@ public class Player extends GameObject {
         }
     }
 
+    public boolean checkItems(Item i){
+
+        boolean found = false;
+
+        for(Item i2 : arrItemList){
+            if(i == i2){
+                found = true;
+            }
+        }
+        return found;
+    }
+
     public ArrayList<GameObject> getKN(){
         return arrGOList;
     }

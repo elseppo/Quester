@@ -7,7 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.sebastian.clausing.quester.helper.DataBaseHelper;
@@ -21,7 +23,7 @@ public class StartScreen extends AppCompatActivity {
 
     private SQLiteDatabase questerDB;
     private DataBaseHelper dbHelper = new DataBaseHelper();
-
+    private Spinner spinner;
 
 
     @Override
@@ -39,12 +41,22 @@ public class StartScreen extends AppCompatActivity {
             }
         });
 
+        spinner = (Spinner) findViewById(R.id.spinner);
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.motivations_array, R.layout.spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
     }
 
     private void newQuest(){
-
+        String motivation = spinner.getSelectedItem().toString();
         Intent myIntent = new Intent(StartScreen.this, QuestScreen.class);
-        myIntent.putExtra("key", value); //Optional parameters
+        myIntent.putExtra("motivation", motivation); //Optional parameters
         StartScreen.this.startActivity(myIntent);
 
     }

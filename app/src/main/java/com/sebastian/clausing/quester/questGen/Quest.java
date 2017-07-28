@@ -8,6 +8,7 @@ import android.util.Log;
 import com.sebastian.clausing.quester.game.GameLogic;
 import com.sebastian.clausing.quester.game.GameObject;
 import com.sebastian.clausing.quester.game.Item;
+import com.sebastian.clausing.quester.game.Location;
 import com.sebastian.clausing.quester.game.NPC;
 import com.sebastian.clausing.quester.game.Player;
 import com.sebastian.clausing.quester.helper.DataBaseHelper;
@@ -39,7 +40,6 @@ public class Quest {
     private ArrayList<Integer> abstractQuestList = new ArrayList<Integer>();
     private ArrayList<Integer> appliedRulesList = new ArrayList<>();
     private ArrayList<Action> questListAbstract = new ArrayList<Action>();
-    private ArrayList<Transition> pendingTasks = new ArrayList<>();
 
     private int strategyID;
     private int motivationID;
@@ -53,6 +53,7 @@ public class Quest {
 
     private NPC questGiver;
     private Player player;
+    private Location currentLocation;
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
@@ -63,21 +64,26 @@ public class Quest {
     //GameWorld
     GameLogic game;
 
-    public Quest(GameLogic prmGame){
+    public Quest(GameLogic prmGame, String prmMotivation){
 
         this.game = prmGame;
         this.questGiver = game.getNPC();
         this.player = game.getPlayer();
+        this.motivationName = prmMotivation;
 
-        // Tell Player some random Locations
+        // Tell Player his start position and other Locations
         player.updateKnowledge(game.getLocation(player));
-        player.updateKnowledge(game.getLocation());
-        player.updateKnowledge(game.getLocation());
-        player.updateKnowledge(game.getLocation());
-        player.updateKnowledge(game.getLocation());
-        player.updateKnowledge(game.getLocation());
-        player.updateKnowledge(game.getLocation());
+        player.updateKnowledge(game.getLocation(2));
+        player.updateKnowledge(game.getLocation(4));
+        player.updateKnowledge(game.getLocation(5));
+        player.updateKnowledge(game.getLocation(12));
+        player.updateKnowledge(game.getLocation(9));
+        player.updateKnowledge(game.getLocation(8));
+        player.updateKnowledge(game.getLocation(7));
+        player.updateKnowledge(game.getLocation(10));
+        player.updateKnowledge(game.getLocation(11));
 
+        currentLocation = game.getLocation(player);
 
         Log.d("Quest", "--- NEW QUEST -------------------------------------------------");
 
@@ -87,7 +93,7 @@ public class Quest {
 
         createAbstractPetriNet();
 
-        Log.d("Quest Strategy:", getStrategyName());
+        //Log.d("Quest", "Strategy: " + strategyID + " " + getStrategyName());
 
 
         //findSplitMerge Method is used, to
@@ -97,7 +103,10 @@ public class Quest {
         //  As long as there are rewritable actions, do
         //Do the Method as long until there are no more rewritable transitions
 
-        while(doSplitMerge == true){
+        Log.d("Quest", "--- FIND SPLITS AND MERGES ---");
+
+
+        while(doSplitMerge == true){ // set to true during initialization
 
             foundRewritableAction = false;
 
@@ -121,17 +130,43 @@ public class Quest {
         //After this Method the quest is fully generated and rules are applied.
 
         //printRewrittenActions();
-        printPetri();
-        simulatePetri();
+       // printPetri();
 
+        simulatePetri();
 
         Log.d("Quest", "---------> EXIT QUEST");
     }
 
     private void determineMotivation(){
         //Determine Motivation
-        int totalMotivations = 9;
-        motivationID=(int) (Math.random()* totalMotivations); // Possible Outcomes from 0 to (totalMotivations -1)
+        Log.d("Motivation: Before" , motivationID + " " + motivationName);
+
+        if(motivationName.equals("Random"))
+        {
+            int totalMotivations = 9;
+            motivationID=(int) (Math.random()* totalMotivations); // Possible Outcomes from 0 to (totalMotivations -1)
+        }else if(motivationName.equals("Knowledge")){
+            motivationID = 0;
+        }else if(motivationName.equals("Comfort")){
+            motivationID =1;
+        }else if(motivationName.equals("Reputation")){
+            motivationID = 2;
+        }else if(motivationName.equals("Serenity")){
+            motivationID = 3;
+        }else if(motivationName.equals("Protection")){
+            motivationID = 4;
+        }else if(motivationName .equals("Conquest")){
+            motivationID = 5;
+        }else if(motivationName.equals("Wealth")){
+            motivationID = 6;
+        }else if(motivationName.equals("Ability")){
+            motivationID = 7;
+        }else if(motivationName.equals("Equipment")){
+            motivationID = 8;
+        }
+
+        Log.d("Motivation: After" , motivationID + " " + motivationName);
+
     }
 
     private void determineStrategyOld(String prmMotivation) {
@@ -263,6 +298,9 @@ public class Quest {
 
     private void createAbstractQuest(){
 
+        Log.d("Quest", "--- CREATE ABSTRACT PETRINET ---");
+
+
         // Determine the Quests Motivation
         determineMotivation();
         GameObject mainGO;
@@ -278,7 +316,6 @@ public class Quest {
             case 0:
                 //Knowledge
                 determineStrategy("Knowledge");
-
 
                 switch(strategyID){
                     case 0: //Deliver Item for Study
@@ -355,7 +392,7 @@ public class Quest {
 
                     case 1: // kill enemy
                         NPC npc = game.getNPC();
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc)));                    //<goto> pests
+                        //questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc)));                    //<goto> pests
                         questListAbstract.add(new Action(countAction.increment() ,11, npc));          //<kill> pests
                         questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(questGiver)));                    //<goto> quest giver
                         questListAbstract.add(new Action(countAction.increment() ,15, questGiver));  //report to quetGIver
@@ -512,15 +549,15 @@ public class Quest {
                     case 0: //attack enemy
                         NPC attack = game.getNPC();
 
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(attack))); //<goto> quest giver
+                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(attack))); //<goto> npc attack
                         questListAbstract.add(new Action(countAction.increment() ,2, game.getLocation(attack))); //damage
                         break;
 
                     case 1: //steal stuff
                         NPC npc2 = game.getNPC();
                         Item item2 = game.getItem(3);
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc2)));                    //<goto> npc
-                        questListAbstract.add(new Action(countAction.increment() ,21, item2));          //steal from npc 2
+                        //questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc2)));                    //<goto> npc
+                        questListAbstract.add(new Action(countAction.increment() ,21, item2, npc2));          //steal from npc 2
                         questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(questGiver)));                    //<goto> npc
                         questListAbstract.add(new Action(countAction.increment() ,9, item2, questGiver));  //give to quetGIver
                         break;
@@ -545,7 +582,7 @@ public class Quest {
                         Item value = game.getItem(3);
                         NPC npc = game.getNPC();
 
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc))); //<goto> item
+                        //questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc))); //<goto> item
                         questListAbstract.add(new Action(countAction.increment() ,21, value, npc)); //steal Item
                         break;
 
@@ -716,6 +753,9 @@ public class Quest {
 
     private void applyRules(Transition prmTSplit, Transition prmTMerge) {
 
+        Log.d("Quest", "--- APPLY RULES ---");
+
+
         applyRulesCounter++;
 
         ArrayList<Action> newActionsList = new ArrayList<>();
@@ -741,7 +781,8 @@ public class Quest {
                 break;
 
             case 10: // <goto>
-
+                Log.d("Quest applyRules: " ,"Current Location: " + currentLocation.getName());
+                Log.d("Quest applyRules: " ,"Goal Location: " + game.getLocation(gOBJ).getName());
                 // If location is unknown, learn it
                 if(player.checkKN(gOBJ) == false){
                     appliedRulesList.add(5);
@@ -752,24 +793,22 @@ public class Quest {
                     //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
                 }
                 else{ // else go to it
-                    switch ((int) (Math.random() * 2)) {
-                        case 0:
-                            Log.d("Quest applyRules: " ,"Rule 3: [<goto> --> goto]");
-                            appliedRulesList.add(3);
+                    if(currentLocation == game.getLocation(gOBJ)){
 
-                            newActionsList.add(new Action(countAction.increment() ,25, gOBJ));   // goto
-                            //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+                        Log.d("Quest applyRules: " ,"Rule 4: [<goto> --> explore]");
+                        appliedRulesList.add(4);
 
-                            break;
-                        case 1:
-                            Log.d("Quest applyRules: " ,"Rule 4: [<goto> --> explore]");
-                            appliedRulesList.add(4);
-
-                            newActionsList.add(new Action(countAction.increment() ,7, gOBJ));    //explore
-                            //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
-
-                            break;
+                        newActionsList.add(new Action(countAction.increment() ,7, gOBJ));    //explore
+                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
                     }
+                    else{
+                        Log.d("Quest applyRules: " ,"Rule 3: [<goto> --> goto]");
+                        appliedRulesList.add(3);
+
+                        newActionsList.add(new Action(countAction.increment() ,25, gOBJ));   // goto
+                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+                    }
+
                 }
                 break;
 
@@ -795,48 +834,67 @@ public class Quest {
                 break;
 
             case 20: // <get>
-                switch ((int) (Math.random() * 4)) {
-                    case 0:
-                        appliedRulesList.add(10);
-                        Log.d("Quest applyRules: " ,"Rule 10: [<get> --> get]");
-                        newActionsList.add(new Action(countAction.increment() ,29, gOBJ));   //get
-                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
-                        break;
-                    case 1:
-                        appliedRulesList.add(11);
-                        NPC npc = game.getNPC();
-                        Item item = (Item) gOBJ;
+                if(currentLocation == game.getLocation(player)){
 
-                        Log.d("Quest applyRules: " ,"Rule 11: [<get> --> <steal>]");
-                        newActionsList.add(new Action(countAction.increment() ,21 , item, npc));   //<steal>
-                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+                    appliedRulesList.add(10);
+                    newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //gather
+                    //newActionsList.get(newActionsList.size()-1).setDescriptionAdd("You already have " + gOBJ.getName());
+                    //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
-                        break;
-                    case 2:
-                        appliedRulesList.add(12);
-                        Log.d("Quest applyRules: " ,"Rule 12: [<get> --> <goto>, <gather>]");
-                        newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ)));   //<goto>
-                        newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //<gather>
-                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
-
-                        break;
-                    case 3:
-                        appliedRulesList.add(13);
-                        Log.d("Quest applyRules: " ,"Rule 13: [<get> --> <goto>, <get>, <goto>, <subquest>, exchange]");
-
-                        Item itemForPlayer = prmTSplit.getAction().getItem(0);
-                        Item itemForNPC = game.getItem(3);
-                        NPC exchangeNPC = game.getNPC();
-
-                        //newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(itemForNPC)));   //<goto>
-                        newActionsList.add(new Action(countAction.increment() ,20, itemForNPC)); //<get>
-                        newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(exchangeNPC))); //<goto> exchange NPC
-                        //newActionsList.add(new Action(countAction.increment() ,22, game.getPlaceholder())); //<subquest>
-                        newActionsList.add(new Action(countAction.increment() ,5, exchangeNPC, itemForNPC, itemForPlayer)); //exchange
-                        //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
-                        break;
                 }
+                else{
+
+                    switch ((int) (Math.random() * 3)) {
+
+                        case 0:
+                            appliedRulesList.add(11);
+
+                            //if the last transition is a transition, that holds a goto action than we need do macke shure, taht the NPC is at that location
+                            NPC npc = game.getNPC();
+
+                            while(game.getLocation(npc) != game.getLocation(gOBJ)){
+                                npc = game.getNPC();
+                                Log.d("Quest applyRules: " ,"Find new npc, that is is at Location " + game.getLocation(gOBJ).getName() + " of object " + gOBJ.getName());
+                            }
+
+                            Log.d("Quest applyRules: " ,"Find new npc, Location is: " + game.getLocation(npc).getName() + " and object " + game.getLocation(gOBJ).getName());
+
+                            Item item = (Item) gOBJ;
+
+                            Log.d("Quest applyRules: " ,"Rule 11: [<get> --> <steal>]");
+                            newActionsList.add(new Action(countAction.increment() ,21 , item, npc));   //<steal>
+                            //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                            break;
+                        case 1:
+                            appliedRulesList.add(12);
+                            Log.d("Quest applyRules: " ,"Rule 12: [<get> --> <goto>, <gather>]");
+                            newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ)));   //<goto>
+                            newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //<gather>
+                            //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+
+                            break;
+                        case 2:
+                            appliedRulesList.add(13);
+                            Log.d("Quest applyRules: " ,"Rule 13: [<get> --> <goto>, <get>, <goto>, <subquest>, exchange]");
+
+                            Item itemForPlayer = prmTSplit.getAction().getItem(0);
+                            Item itemForNPC = game.getItem(3);
+                            NPC exchangeNPC = game.getNPC();
+
+                            //newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(itemForNPC)));   //<goto>
+                            newActionsList.add(new Action(countAction.increment() ,20, itemForNPC)); //<get>
+                            newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(exchangeNPC))); //<goto> exchange NPC
+                            //newActionsList.add(new Action(countAction.increment() ,22, game.getPlaceholder())); //<subquest>
+                            newActionsList.add(new Action(countAction.increment() ,5, exchangeNPC, itemForNPC, itemForPlayer)); //exchange
+                            //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+                            break;
+                    }
+
+                }
+
+
                 break;
 
             case 21: // <steal>
@@ -987,8 +1045,6 @@ public class Quest {
         prmTSplit.setSplit(true);
         prmTMerge.setMerge(true);
 
-        //Add Split to pending Tasks
-        pendingTasks.add(prmTSplit);
 
         // First Place after the Split
         place = new Place(setName("P"),0);
@@ -999,8 +1055,16 @@ public class Quest {
         quest.add(arcTP);
 
         for(Action a: prmActionList){
-
+            //-------------------------------------------------------------
+            //Must be done at FIRST
+            //Set Action Description
             a.setDescription();
+
+            //Set new actualLocation if necessary
+            if(a.getActionID() == 25){
+                currentLocation = game.getLocation(a.getGameObject());
+            }
+            // ------------------------------------------------------------
 
             //Setup Transition
             transition = new Transition(setName("T"), newDepth);
@@ -1020,6 +1084,8 @@ public class Quest {
             arc = new Arc(setName("A"), transition, place);
             quest.add(arc);
 
+            //Add the new Transition as a child to the Split Transition
+            prmTSplit.addChild(transition);
         }
 
         // Connection the last place with the merge Transition
@@ -1035,6 +1101,9 @@ public class Quest {
     }
 
     private void createAbstractPetriNet(){
+
+        Log.d("Quest", "--- CREATE ABSTRACT QUEST ---");
+
 
         Transition transition;
         Arc arc;
@@ -1184,12 +1253,16 @@ public class Quest {
 
     public void generateAbstractQuestDescription(){
 
+        Log.d("Quest", "--- GENERATE ABSTRACT DESCRIPTION ---");
+
+
         printLists();
         boolean returnToQuestGiver = false;
         int s = questListAbstract.size();
 
         //Adress Player
-        abstractDesctription = "Hey, my name is " + questGiver.getName() + ". I'd like you to do me a favour. Could you please ";
+        // abstractDesctription = "Hey, my name is " + questGiver.getName() + ". I'd like you to do me a favour. Could you please ";
+        abstractDesctription = "";
 
         if(questListAbstract.size()>=2)
         {
@@ -1233,10 +1306,13 @@ public class Quest {
                 }
 
                 } else if (action == questListAbstract.get(s-1)) {
-                    abstractDesctription = abstractDesctription + ". If you are done, come back to " + game.getLocation(questGiver).getName() + " and " + action.getDescription();
+                    abstractDesctription = abstractDesctription + ". If you are done, go to " + questGiver.getName() + " at " + game.getLocation(questGiver).getName() + " and " + action.getDescription();
                 }
             }
         abstractDesctription = abstractDesctription + ".";
+
+        //Capitalize forst letter
+        abstractDesctription = abstractDesctription.substring(0, 1).toUpperCase() + abstractDesctription.substring(1);
         Log.d("SetDescription", "Final: " + abstractDesctription);
     }
 
@@ -1271,7 +1347,11 @@ public class Quest {
 
     }
 
-    private void simulatePetri(){
+    public void simulatePetri(){
+
+        ArrayList<Transition> atomic = new ArrayList<>();
+        ArrayList<Transition> parent = new ArrayList<>();
+
 
         Log.d("Quest Simulate", "---------> Simulate Petri Net");
         Log.d("Quest Simulate", "Player Start Pos: " + game.getLocation(player).getName());
@@ -1284,6 +1364,13 @@ public class Quest {
 
         while(quest.getTransitionsAbleToFire().size()>0){
             for(Transition t: quest.getTransitionsAbleToFire()){
+
+                if (t.getAction().getIsActionRewritten()==false){
+                    atomic.add(t);
+                }
+
+                parent.add(t);
+
                 t.fire();
                 String type ="";
 
@@ -1297,52 +1384,74 @@ public class Quest {
 
                 if(t.getDepth() == 0)
                 {
-                    Log.d("Quest Simulate", t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }
                 else if(t.getDepth() == 1)
                 {
-                    Log.d("Quest Simulate", "|   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }
                 else if(t.getDepth() == 2)
                 {
-                    Log.d("Quest Simulate", "|   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }
                 else if(t.getDepth() == 3)
                 {
-                    Log.d("Quest Simulate", "|   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }
                 else if(t.getDepth() == 4)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 5)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 6)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 7)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 8)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 9)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 10)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else if(t.getDepth() == 11)
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }else
                 {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getGameObject().getName());
+                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
                 }
 
 
             }
         }
+
+        Log.d("Quest Simulate", "---------> Actions to do:");
+
+        for(Transition tz : atomic){
+            Log.d("Quest Simulate",tz.getName() + " Action " +  tz.getAction().getDescription());
+        }
+
+        Log.d("Quest Simulate", "---------> Parent Transitions:");
+
+        for(Transition par: parent){
+
+            if(par.getChilds().size()>0){
+                Log.d("Quest Simulate",par.getName() + " Action: " + par.getAction().getActionName());
+
+                for (Transition child: par.getChilds()){
+                    Log.d("Quest Simulate"," |-- " + child.getName() + " Action: " + child.getAction().getActionName());
+                }
+            }
+        }
+
+        quest.getPlaces().get(0).setTokens(1);
+
     }
 
     public Petrinet getQuest(){

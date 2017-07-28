@@ -27,6 +27,7 @@ public class FragmentQuest extends Fragment {
     //Objects
     private GameLogic objGameL;
     private Quest objQuest;
+    private String motivation;
 
     //UI
     private TextView txtVQuestDescription;
@@ -48,14 +49,14 @@ public class FragmentQuest extends Fragment {
         // CREATE VIEWS HERE
 
         View layout = inflater.inflate(R.layout.content_quest_fragment, null);
-        txtVQuestStrategy = (TextView) layout.findViewById(R.id.txtV_Strategy);
+        //txtVQuestStrategy = (TextView) layout.findViewById(R.id.txtV_Strategy);
         txtVQuestDescription = (TextView) layout.findViewById(R.id.txtV_QuestDescription);
-        txtVQuestMotivation = (TextView) layout.findViewById(R.id.txtV_Motivation);
+        //txtVQuestMotivation = (TextView) layout.findViewById(R.id.txtV_Motivation);
         txtVQuestGiver = (TextView) layout.findViewById(R.id.txtV_QuestGiver);
 
-        txtVQuestGiver.setText("Quest Giver: " + objQuest.getQuestGiver().getName() + " (lives in " + objGameL.getLocation(objQuest.getQuestGiver()).getName() + ")");
-        txtVQuestMotivation.setText("Motivation: " + objQuest.getMotivationName());
-        txtVQuestStrategy.setText("Strategy: "+ objQuest.getStrategyName());
+        txtVQuestGiver.setText(objQuest.getQuestGiver().getName() + " from " + objGameL.getLocation(objQuest.getQuestGiver()).getName() + " seeks for " + objQuest.getMotivationName() +  " and asks you to " + objQuest.getStrategyName());
+        //txtVQuestMotivation.setText("The Quest is : " + objQuest.getMotivationName());
+        //txtVQuestStrategy.setText("Strategy: "+ objQuest.getStrategyName());
         txtVQuestDescription.setText(objQuest.getAbstractDescription());
 
         //Log.d("FragQuest onCreateView", "mCallback");
@@ -92,10 +93,11 @@ public class FragmentQuest extends Fragment {
 
 
     public void setObjects(GameLogic prmGameL, Quest prmQuest){
-
         this.objQuest = prmQuest;
         this.objGameL = prmGameL;
+
     }
+
 
 
 

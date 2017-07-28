@@ -3,11 +3,14 @@ package com.sebastian.clausing.quester.screens;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import com.sebastian.clausing.quester.R;
 import com.sebastian.clausing.quester.game.GameLogic;
@@ -26,8 +29,9 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
 
     //Objects
     private GameLogic objGameL = new GameLogic();
-    private Quest objQuest = new Quest(objGameL);
-    private Petrinet pnQuest = objQuest.getQuest();
+    private Quest objQuest;
+    private Petrinet pnQuest;
+    private String motivation;
 
     //UI
     private Button btnStart;
@@ -38,9 +42,16 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quest_screen);
 
+        //Create new Quest
+        Intent intent = getIntent();
+        motivation = intent.getStringExtra("motivation");
+        objQuest = new Quest(objGameL, motivation);
+        pnQuest = objQuest.getQuest();
+
         //find the retained fragments on activity start
         Log.d("QuestScreen onCreate" , "Set fm");
         fragmentQuest = (FragmentQuest) fm.findFragmentByTag(TAG_FRAGMENT_QUEST);
+
 
         if (fragmentQuest == null) {
             // addGameObject the fragment
@@ -60,7 +71,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
         btnStart.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 //Log.d("QuestScreen " , "Button Start Pressed");
-                startQuest();
+                //startQuest();
             }
         });
     }
@@ -88,7 +99,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
                 fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
                 fragmentTransaction.commit();
 
-                btnStart.setText("NEXT");
+                btnStart.setText("Next");
                 fragmentAction.setObjects(objGameL,objQuest);
             }
 
@@ -101,7 +112,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
         }
         else{
             // Create new Quest
-            objQuest = new Quest(objGameL);
+            objQuest = new Quest(objGameL, motivation);
             pnQuest = objQuest.getQuest();
 
             // Send new Quest to the fragments

@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- https://material.io/guidelines/style/color.html -->
+
     <color name="colorPrimary">#1DB992</color>
     <color name="colorPrimaryDark">#137E64</color>
-    <color name="colorAccent">#64FFDA</color>
+    <color name="colorAccent">#FAFAFA</color>
     <color name="colorBackground">#212121</color>
+    <color name="colorBackground2">#004D40</color>
     <color name="colorWhiteText">#F7FFFF</color>
 
 </resources>
