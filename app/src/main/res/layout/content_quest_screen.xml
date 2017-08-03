@@ -43,7 +43,7 @@
             android:layout_gravity="bottom|center"
             android:textColor="@color/colorWhiteText"
             android:backgroundTint="@color/colorPrimaryDark"
-            android:visibility="visible"
+            android:visibility="invisible"
             android:text="Start Quest" />
 
 

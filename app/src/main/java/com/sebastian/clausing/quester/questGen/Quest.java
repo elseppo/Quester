@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 
-import com.sebastian.clausing.quester.game.GameLogic;
+import com.sebastian.clausing.quester.game.GameManager;
 import com.sebastian.clausing.quester.game.GameObject;
 import com.sebastian.clausing.quester.game.Item;
 import com.sebastian.clausing.quester.game.Location;
@@ -62,9 +62,9 @@ public class Quest {
     private Petrinet quest = new Petrinet("Quest");
 
     //GameWorld
-    GameLogic game;
+    GameManager game;
 
-    public Quest(GameLogic prmGame, String prmMotivation){
+    public Quest(GameManager prmGame, String prmMotivation){
 
         this.game = prmGame;
         this.questGiver = game.getNPC();

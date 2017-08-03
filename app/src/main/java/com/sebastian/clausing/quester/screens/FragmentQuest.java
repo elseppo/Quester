@@ -1,22 +1,15 @@
 package com.sebastian.clausing.quester.screens;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.sebastian.clausing.quester.R;
-import com.sebastian.clausing.quester.game.GameLogic;
-import com.sebastian.clausing.quester.helper.DataBaseHelper;
+import com.sebastian.clausing.quester.game.GameManager;
 import com.sebastian.clausing.quester.questGen.Quest;
 
 public class FragmentQuest extends Fragment {
@@ -25,7 +18,7 @@ public class FragmentQuest extends Fragment {
     private MessageFlow mCallback;
 
     //Objects
-    private GameLogic objGameL;
+    private GameManager objGameL;
     private Quest objQuest;
     private String motivation;
 
@@ -92,7 +85,7 @@ public class FragmentQuest extends Fragment {
     }
 
 
-    public void setObjects(GameLogic prmGameL, Quest prmQuest){
+    public void setObjects(GameManager prmGameL, Quest prmQuest){
         this.objQuest = prmQuest;
         this.objGameL = prmGameL;
 

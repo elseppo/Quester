@@ -12,16 +12,14 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.sebastian.clausing.quester.R;
-import com.sebastian.clausing.quester.game.GameLogic;
+import com.sebastian.clausing.quester.game.GameManager;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
-
-import static android.support.v4.content.ContextCompat.getColor;
 
 public class FragmentAction extends Fragment {
 
     //Objects
-    private GameLogic objGameL;
+    private GameManager objGameL;
     private Quest objQuest;
 
     // UI
@@ -112,7 +110,7 @@ public class FragmentAction extends Fragment {
 
     }
 
-    public void setObjects(GameLogic prmGameL, Quest prmQuest){
+    public void setObjects(GameManager prmGameL, Quest prmQuest){
         this.objQuest = prmQuest;
         this.objGameL = prmGameL;
     }

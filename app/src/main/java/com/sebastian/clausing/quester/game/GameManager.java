@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Created by Sebs-Desktop on 03.07.2017.
  */
 
-public class GameLogic {
+public class GameManager {
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
@@ -24,7 +24,7 @@ public class GameLogic {
     private ArrayList<NPC> arrNPCList = new ArrayList<>();
     private Player player = new Player(0, "Player1");
 
-    public GameLogic(){
+    public GameManager(){
         //Open DB
         questerDB = dbHelper.getStaticDb();
 

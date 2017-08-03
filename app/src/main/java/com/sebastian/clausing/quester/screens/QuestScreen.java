@@ -8,12 +8,10 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 
 import com.sebastian.clausing.quester.R;
-import com.sebastian.clausing.quester.game.GameLogic;
+import com.sebastian.clausing.quester.game.GameManager;
 import com.sebastian.clausing.quester.petriNet.Petrinet;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
@@ -28,7 +26,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
     private static final String TAG_FRAGMENT_ACTION = "fragmentAction";
 
     //Objects
-    private GameLogic objGameL = new GameLogic();
+    private GameManager objGameL = new GameManager();
     private Quest objQuest;
     private Petrinet pnQuest;
     private String motivation;
