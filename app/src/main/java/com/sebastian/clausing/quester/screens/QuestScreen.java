@@ -32,7 +32,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
     private String motivation;
 
     //UI
-    private Button btnStart;
+    private Button showActions;
 
 
     @Override
@@ -65,11 +65,11 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
 
         fragmentQuest.setObjects(objGameL, objQuest);
 
-        btnStart = (Button) findViewById(R.id.btn_start);
-        btnStart.setOnClickListener(new View.OnClickListener(){
+        showActions = (Button) findViewById(R.id.btn_show_actions);
+        showActions.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 //Log.d("QuestScreen " , "Button Start Pressed");
-                //startQuest();
+                swapFragments();
             }
         });
     }
@@ -97,7 +97,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
                 fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
                 fragmentTransaction.commit();
 
-                btnStart.setText("Next");
+                showActions.setText("Next");
                 fragmentAction.setObjects(objGameL,objQuest);
             }
 
@@ -118,7 +118,7 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
             fragmentAction.setObjects(objGameL,objQuest);
 
             // Change Button back to start
-            btnStart.setText("Start Quest");
+            showActions.setText("Start Quest");
 
             // Replace Fragments
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -128,6 +128,47 @@ public class QuestScreen extends FragmentActivity implements FragmentQuest.Messa
         }
     }
 
+
+    private void swapFragments(){
+        //Swaps between player actions and quest description
+        // create the fragment and data the first time
+
+        if (fragmentAction == null) {
+            Log.d("QuestScreen onCreate" , "create FragmentAction for first time");
+            //Swap Fragment to Action
+
+            fragmentAction = (FragmentAction) Fragment.instantiate(this, FragmentAction.class.getName(), null);
+
+            fm.beginTransaction().add(fragmentAction, TAG_FRAGMENT_ACTION).commit();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
+            fragmentTransaction.commit();
+
+            showActions.setText("Show Quest");
+            fragmentAction.setObjects(objGameL,objQuest);
+
+        }else if(fragmentAction.isVisible()){
+            // Swap Fragment Back to Quest Overview
+            Log.d("QuestScreen onCreate" , "Swap From Action to Quest");
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.flFragmentContainer, fragmentQuest);
+            fragmentTransaction.commit();
+
+            showActions.setText("Show Actions");
+
+        } else if(fragmentQuest.isVisible()){
+            //SWap Fragment to Action
+            Log.d("QuestScreen onCreate" , "Swap From Quest to Action");
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.flFragmentContainer, fragmentAction);
+            fragmentTransaction.commit();
+
+            showActions.setText("Show Quest");
+        }
+
+
+
+    }
 
     public void message(String prmMessage) {
         // The user selected the headline of an article from the HeadlinesFragment

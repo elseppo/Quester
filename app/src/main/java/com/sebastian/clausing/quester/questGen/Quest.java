@@ -40,6 +40,8 @@ public class Quest {
     private ArrayList<Integer> abstractQuestList = new ArrayList<Integer>();
     private ArrayList<Integer> appliedRulesList = new ArrayList<>();
     private ArrayList<Action> questListAbstract = new ArrayList<Action>();
+    private ArrayList<Transition> atomicActions = new ArrayList<>();
+    private ArrayList<String> actionDescriptions = new ArrayList<>();
 
     private int strategyID;
     private int motivationID;
@@ -1349,9 +1351,7 @@ public class Quest {
 
     public void simulatePetri(){
 
-        ArrayList<Transition> atomic = new ArrayList<>();
         ArrayList<Transition> parent = new ArrayList<>();
-
 
         Log.d("Quest Simulate", "---------> Simulate Petri Net");
         Log.d("Quest Simulate", "Player Start Pos: " + game.getLocation(player).getName());
@@ -1363,16 +1363,19 @@ public class Quest {
         Log.d("Quest Simulate", "|   |   |   |   |   |   |");
 
         while(quest.getTransitionsAbleToFire().size()>0){
+            String type ="";
+            String depth ="";
+
+
             for(Transition t: quest.getTransitionsAbleToFire()){
 
                 if (t.getAction().getIsActionRewritten()==false){
-                    atomic.add(t);
+                    atomicActions.add(t);
                 }
 
                 parent.add(t);
 
                 t.fire();
-                String type ="";
 
                 if(t.isMerge() == true){
                     type = type + " MERGE";
@@ -1382,58 +1385,26 @@ public class Quest {
                     type = type + " SPLIT";
                 }
 
-                if(t.getDepth() == 0)
-                {
-                    Log.d("Quest Simulate", t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }
-                else if(t.getDepth() == 1)
-                {
-                    Log.d("Quest Simulate", "|   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }
-                else if(t.getDepth() == 2)
-                {
-                    Log.d("Quest Simulate", "|   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }
-                else if(t.getDepth() == 3)
-                {
-                    Log.d("Quest Simulate", "|   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }
-                else if(t.getDepth() == 4)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 5)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 6)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 7)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 8)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 9)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 10)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else if(t.getDepth() == 11)
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
-                }else
-                {
-                    Log.d("Quest Simulate", "|   |   |   |   |   |   |   |   |   |   |   |   " + t.getName() + " - " + t.getAction().getActionName() + " " + t.getAction().getDescription());
+                for(int i = 0; i < t.getDepth(); i++){
+                    depth = depth + "|   ";
                 }
 
+                if(t.getAction().getDescription()!=null){
+                    actionDescriptions.add(depth + t.getName() + " - [" + t.getAction().getActionName() + "]: " + t.getAction().getDescription());
+                }else{
+                    actionDescriptions.add(depth + t.getName());
+                }
+            }
 
             }
+
+        for(String s : actionDescriptions){
+            Log.d("Quest Simulate", "" +s);
         }
 
         Log.d("Quest Simulate", "---------> Actions to do:");
 
-        for(Transition tz : atomic){
+        for(Transition tz : atomicActions){
             Log.d("Quest Simulate",tz.getName() + " Action " +  tz.getAction().getDescription());
         }
 
@@ -1494,6 +1465,10 @@ public class Quest {
 
     public String getMotivationName(){
         return motivationName;
+    }
+
+    public ArrayList getActions(){
+        return actionDescriptions;
     }
 
 }

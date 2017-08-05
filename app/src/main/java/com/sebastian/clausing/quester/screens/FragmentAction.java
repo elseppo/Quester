@@ -8,13 +8,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sebastian.clausing.quester.R;
 import com.sebastian.clausing.quester.game.GameManager;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class FragmentAction extends Fragment {
 
@@ -30,6 +35,8 @@ public class FragmentAction extends Fragment {
     private String actionStep;
     private String actionDescription;
     private int position = 0;
+    private ListView lvActions;
+    private ArrayList<String> action = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,12 +49,26 @@ public class FragmentAction extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // CREATE VIEWS HERE
         //Log.d("FragmentAction " , "onCreateView");
+        Log.d("Atomic Actions: ", "test");
+
         View layout = inflater.inflate(R.layout.content_action_fragment, container, false);
+        Log.d("Atomic Actions: ", "test2");
+
+        lvActions = (ListView) layout.findViewById(R.id.lv_Actions);
         txtActionStep = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
         txtActionDescription = (TextView) layout.findViewById(R.id.txtV_action_description);
 
-        txtActionStep.setText(actionStep);
-        txtActionDescription.setText(actionDescription);
+        //Log.d("FragmentAction " , objQuest.getAbstractDescription().);
+
+        Log.d("Atomic Actions: ", "test3");
+
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_action, action );
+        lvActions.setAdapter(arrayAdapter);
+
+        Log.d("Atomic Actions: ", "test4");
+
+
         return layout;
     }
 
@@ -113,5 +134,10 @@ public class FragmentAction extends Fragment {
     public void setObjects(GameManager prmGameL, Quest prmQuest){
         this.objQuest = prmQuest;
         this.objGameL = prmGameL;
+        this.action = objQuest.getActions();
+
+        for(String s:action){
+            Log.d("Atomic Actions setObj: ", " " + s );
+        }
     }
 }

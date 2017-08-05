@@ -37,14 +37,14 @@
 
 
         <Button
-            android:id="@+id/btn_start"
+            android:id="@+id/btn_show_actions"
             android:layout_width="150dp"
             android:layout_height="100dp"
             android:layout_gravity="bottom|center"
             android:textColor="@color/colorWhiteText"
             android:backgroundTint="@color/colorPrimaryDark"
-            android:visibility="invisible"
-            android:text="Start Quest" />
+            android:visibility="visible"
+            android:text="Show Actions" />
 
 
 

@@ -344,6 +344,16 @@ public class Action {
         else if(actionID == 21){
             description = str + " " + getGameObject().getName() + " from " + getNPC(0).getName();
            // Log.d("SetDescription", "Steal " + description);
+        // Escort someone
+        }else if(actionID == 4){
+            String entries[] = str.split("NPC");
+            // Log.d("SetDescription", "E0 " + entries[0]);
+            //Log.d("SetDescription", "GO " + getGameObject().getName());
+            // Log.d("SetDescription", "E1" + entries[1]);
+
+            description = entries[0] + getGameObject().getName() + entries[1] + getNPC(0).getHomeSTRING();
+            //Log.d("SetDescription", description);
+
         }
         // All other cases with the Term ITEM in
         else if (str.contains("ITEM")) {
