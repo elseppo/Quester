@@ -72,6 +72,11 @@ public class StartScreen extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     public void openDB(){
 
         questerDB = dbHelper.getStaticDb();

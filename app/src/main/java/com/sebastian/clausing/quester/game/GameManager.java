@@ -62,6 +62,16 @@ public class GameManager {
             arrLocationList.add(new Location(c.getInt(0),c.getString(1),c.getString(2),c.getInt(3),c.getInt(4),c.getInt(5)));
         }
 
+        ///
+
+        c = questerDB.rawQuery("SELECT * FROM Ability;", null);
+        c.move(-1);
+
+        while(c.moveToNext()){
+
+        }
+
+        ////
         //Close DB
         questerDB.close();
 

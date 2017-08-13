@@ -24,7 +24,7 @@ public class FragmentQuest extends Fragment {
 
     //UI
     private TextView txtVQuestDescription;
-    private TextView txtVQuestStrategy;
+    private TextView txtVQuestHL1;
     private TextView txtVQuestMotivation;
     private TextView txtVQuestGiver;
 
@@ -44,10 +44,10 @@ public class FragmentQuest extends Fragment {
         View layout = inflater.inflate(R.layout.content_quest_fragment, null);
         //txtVQuestStrategy = (TextView) layout.findViewById(R.id.txtV_Strategy);
         txtVQuestDescription = (TextView) layout.findViewById(R.id.txtV_QuestDescription);
-        //txtVQuestMotivation = (TextView) layout.findViewById(R.id.txtV_Motivation);
+        txtVQuestHL1 = (TextView) layout.findViewById(R.id.txtV_HL1);
         txtVQuestGiver = (TextView) layout.findViewById(R.id.txtV_QuestGiver);
 
-        txtVQuestGiver.setText(objQuest.getQuestGiver().getName() + " from " + objGameL.getLocation(objQuest.getQuestGiver()).getName() + " seeks for " + objQuest.getMotivationName() +  " and asks you to " + objQuest.getStrategyName());
+        txtVQuestGiver.setText(objQuest.getQuestGiver().getName() + " from " + objGameL.getLocation(objQuest.getQuestGiver()).getName() + " seeks for " + objQuest.getMotivationName() +  " and asks you to " + objQuest.getStrategyName() + ".");
         //txtVQuestMotivation.setText("The Quest is : " + objQuest.getMotivationName());
         //txtVQuestStrategy.setText("Strategy: "+ objQuest.getStrategyName());
         txtVQuestDescription.setText(objQuest.getAbstractDescription());

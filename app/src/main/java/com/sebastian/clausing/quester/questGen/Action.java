@@ -33,6 +33,7 @@ public class Action {
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
+    private GameObject learn;
 
     private ArrayList<GameObject> arrayListGO = new ArrayList<>();
     private ArrayList<Item> arrItemList = new ArrayList<>();
@@ -150,6 +151,62 @@ public class Action {
 
         setRewriteAction(actionID);
         addGameObject(o);
+    }
+
+    //Construvtor for Action creation with additional gameobject (LISTEN to learn)
+    public Action(int prmPosition, int prmID, NPC npc ,GameObject o){
+        openDB();
+        Cursor c;
+
+        // GET ACTION NAME
+        c = questerDB.rawQuery("SELECT * FROM Actions WHERE _id = " + prmID + ";", null);
+        c.moveToFirst();
+
+        this.actionID = prmID;
+        this.actionPosition = prmPosition;
+        this.actionName = c.getString(1);
+        this.keywords = c.getString(2);
+        this.itemuse = c.getInt(3);
+        questerDB.close();
+
+        setRewriteAction(actionID);
+
+        if(actionID == 12){
+            learn = o; // Is the thing to be learned
+            arrNPCList.add(npc);
+        }else{
+            addGameObject(o); // Is the thing to be learned
+            arrNPCList.add(npc);
+        }
+
+    }
+
+    //Construvtor for Action creation with additional gameobject (READ to learn)
+    public Action(int prmPosition, int prmID, Item item, GameObject o){
+        openDB();
+        Cursor c;
+
+        // GET ACTION NAME
+        c = questerDB.rawQuery("SELECT * FROM Actions WHERE _id = " + prmID + ";", null);
+        c.moveToFirst();
+
+        this.actionID = prmID;
+        this.actionPosition = prmPosition;
+        this.actionName = c.getString(1);
+        this.keywords = c.getString(2);
+        this.itemuse = c.getInt(3);
+        questerDB.close();
+
+        setRewriteAction(actionID);
+
+        if(actionID == 13){
+            learn = o; // Is the thing to be learned
+            arrItemList.add(item);
+        }else{
+            addGameObject(o); // Is the thing to be learned
+            arrItemList.add(item);
+        }
+
     }
 
     //Constructor for upcounting Action with automatic rewrite setting due to ID
@@ -273,7 +330,7 @@ public class Action {
 
     public void setDescription() {
 
-        //Log.d("SetDescription", "Action: " + getActionID());
+        Log.d("SetDescription", "Action: " + getActionID() + " " + actionName);
         //Log.d("SetDescription", "Game Object: " + getGameObject().getName());
 
         String str = getKeyword();
@@ -292,7 +349,7 @@ public class Action {
         }
 
         // Action capture
-        if ((actionID == 9 || actionID == 31) & arrItemList.size() == 0) {
+        if ((actionID == 9 || actionID == 31) & arrItemList.size() == 0 && capturedNPC != null && normalNPC != null){
             String part1;
 
             String entries[] = str.split("ITEM");
@@ -314,32 +371,61 @@ public class Action {
 
             String part1;
 
-            String entries[] = str.split("ITEM");
-            //Log.d("SetDescription", "E0 " + entries[0]);
-            //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
-            //Log.d("SetDescription", "Item " + arrItemList.get(0).getName());
+            if(arrItemList.size()>0){
+                //GIVE TIEM
+                String entries[] = str.split("ITEM");
+                //Log.d("SetDescription", "E0 " + entries[0]);
+                //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+                //Log.d("SetDescription", "Item " + arrItemList.get(0).getName());
+                Log.d("SetDescription", "CHAR Pos != null description: " + str);
+                Log.d("SetDescription", "CHAR Pos != null list: " + arrItemList.get(0).getName());
+                Log.d("SetDescription", "CHAR Pos != null list: " + arrNPCList.get(0).getName());
 
-            //Log.d("SetDescription", "E1" + entries[1]);
-            part1 = entries[0] + arrItemList.get(0).getName() + entries[1];
 
-            String entries2[] = part1.split("NPC");
-            //Log.d("SetDescription", "E0 " + entries2[0]);
-            //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
-            description = entries2[0] + arrNPCList.get(0).getName();
+                //Log.d("SetDescription", "E1" + entries[1]);
+                part1 = entries[0] + arrItemList.get(0).getName() + " to ";
 
-            //Log.d("SetDescription", "part1" + part1);
-            //Log.d("SetDescription", "description: " + description);
+                String entries2[] = part1.split("NPC");
+                //Log.d("SetDescription", "E0 " + entries2[0]);
+                //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+                description = entries2[0] + arrNPCList.get(0).getName();
+
+                //Log.d("SetDescription", "part1" + part1);
+                Log.d("SetDescription", "CHAR Pos != null description: " + description);
+            }else{
+
+                //GIVE TIEM
+                String entries[] = str.split("ITEM");
+                //Log.d("SetDescription", "E0 " + entries[0]);
+                //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+                //Log.d("SetDescription", "Item " + arrItemList.get(0).getName());
+                //Log.d("SetDescription", "E1" + entries[1]);
+                part1 = entries[0] + arrNPCList.get(1).getName() + " to ";
+
+                String entries2[] = part1.split("NPC");
+                //Log.d("SetDescription", "E0 " + entries2[0]);
+                //Log.d("SetDescription", "NPC " + arrNPCList.get(0).getName());
+                description = entries2[0] + arrNPCList.get(0).getName();
+
+                //Log.d("SetDescription", "CHAR Pos 0: " + arrNPCList.get(0).getName());
+                //Log.d("SetDescription", "CHAR Pos 1: " + arrNPCList.get(1).getName());
+                //Log.d("SetDescription", "CHAR Pos DESC: " + description);
+
+            }
+
+
 
         }
         // Special Case, if Action "use" is used to capture criminal
         else if (actionID == 19) {
+            Log.d("SetDescription", "Special Case 19");
             if (arrItemList.size() > 0 && arrNPCList.size() > 0) {
-                description = " capture " + arrNPCList.get(0).getName() + " with " + arrItemList.get(0).getName();
+                Log.d("SetDescription", "If CLause");
+                description = str + " " + arrNPCList.get(0).getName() + " with " + arrItemList.get(0).getName();
+            }else{
+                description = str + " " + getGameObject().getName();
             }
-            description = str + " " + getGameObject().getName();
-            //Log.d("SetDescription", description);
         }
-
         //STEAL Sth FROM  someone
         else if(actionID == 21){
             description = str + " " + getGameObject().getName() + " from " + getNPC(0).getName();
@@ -351,18 +437,40 @@ public class Action {
             //Log.d("SetDescription", "GO " + getGameObject().getName());
             // Log.d("SetDescription", "E1" + entries[1]);
 
-            description = entries[0] + getGameObject().getName() + entries[1] + getNPC(0).getHomeSTRING();
+            description = entries[0] + arrNPCList.get(0).getName() + entries[1] + getNPC(0).getHomeSTRING();
             //Log.d("SetDescription", description);
 
+        }else if(actionID == 23 || actionID == 30){
+            // Learn Location of ...
+            description = str + " location of " + getGameObject().getName();
+        } else if (actionID == 18 && arrNPCList.size()>0){
+            // Steal sth from someone
+            String entries[] = str.split("ITEM");
+            // Log.d("SetDescription", "E0 " + entries[0]);
+            //Log.d("SetDescription", "GO " + getGameObject().getName());
+            // Log.d("SetDescription", "E1" + entries[1]);
+
+            description = entries[0] + getGameObject().getName() + " from " + arrNPCList.get(0).getName();
         }
-        // All other cases with the Term ITEM in
+        else if(actionID == 12){
+            //LISTEN
+            if(learn == null){
+                description = str + " " + arrNPCList.get(0).getName();
+            }else{
+                description = str + " " + arrNPCList.get(0).getName() + " to learn location of " + learn.getName();
+            }
+        }else if(actionID == 13){
+            //READ
+            description = str + " " + arrItemList.get(0).getName() + " to learn location of " + learn.getName();
+        }
         else if (str.contains("ITEM")) {
             String entries[] = str.split("ITEM");
            // Log.d("SetDescription", "E0 " + entries[0]);
             //Log.d("SetDescription", "GO " + getGameObject().getName());
            // Log.d("SetDescription", "E1" + entries[1]);
 
-            description = entries[0] + getGameObject().getName() + entries[1];
+            Log.d("ItemL", "= " + arrItemList.size());
+            description = entries[0] + arrItemList.get(0).getName();
             //Log.d("SetDescription", description);
 
         }
@@ -370,10 +478,10 @@ public class Action {
         else {
             description = str + " " + getGameObject().getName();
 
-            //Log.d("SetDescription", description);
         }
 
         description = description + add;
+        Log.d("SetDescription", "Description = " + description);
 
         //String s1 = description.substring(0, 1).toUpperCase();
         //String CaPdescription = s1 + description.substring(1);

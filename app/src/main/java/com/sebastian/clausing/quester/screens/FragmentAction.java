@@ -15,11 +15,14 @@ import android.widget.TextView;
 
 import com.sebastian.clausing.quester.R;
 import com.sebastian.clausing.quester.game.GameManager;
+import com.sebastian.clausing.quester.helper.MyListAdapter;
 import com.sebastian.clausing.quester.petriNet.Transition;
 import com.sebastian.clausing.quester.questGen.Quest;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+import static com.sebastian.clausing.quester.R.id.toolbar;
 
 public class FragmentAction extends Fragment {
 
@@ -45,6 +48,7 @@ public class FragmentAction extends Fragment {
         setRetainInstance(true);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // CREATE VIEWS HERE
@@ -55,19 +59,20 @@ public class FragmentAction extends Fragment {
         Log.d("Atomic Actions: ", "test2");
 
         lvActions = (ListView) layout.findViewById(R.id.lv_Actions);
-        txtActionStep = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
-        txtActionDescription = (TextView) layout.findViewById(R.id.txtV_action_description);
+        //txtActionStep = (TextView) layout.findViewById(R.id.txtV_Your_Quest);
+        //txtActionDescription = (TextView) layout.findViewById(R.id.txtV_action_description);
 
         //Log.d("FragmentAction " , objQuest.getAbstractDescription().);
 
         Log.d("Atomic Actions: ", "test3");
 
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_action, action );
+        MyListAdapter arrayAdapter = new MyListAdapter(getActivity(), R.layout.list_item_action, action );
         lvActions.setAdapter(arrayAdapter);
 
         Log.d("Atomic Actions: ", "test4");
 
+        //((QuestScreen) getActivity()).setBack();
 
         return layout;
     }
@@ -85,6 +90,8 @@ public class FragmentAction extends Fragment {
         mActivity = (Activity) context;
         mContext = context;
         //Log.d("FragmentAction " , "onAttach");
+
+
        }
 
     public void nextAction(Transition prmTransition){

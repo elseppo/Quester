@@ -42,6 +42,7 @@ public class Quest {
     private ArrayList<Action> questListAbstract = new ArrayList<Action>();
     private ArrayList<Transition> atomicActions = new ArrayList<>();
     private ArrayList<String> actionDescriptions = new ArrayList<>();
+    //private ArrayList<ArrayList <Location> > visitedLocations = new ArrayList<>();
 
     private int strategyID;
     private int motivationID;
@@ -56,6 +57,7 @@ public class Quest {
     private NPC questGiver;
     private Player player;
     private Location currentLocation;
+    //private Transition currentLocationPermission;
 
     private DataBaseHelper dbHelper = new DataBaseHelper();
     private SQLiteDatabase questerDB;
@@ -85,9 +87,14 @@ public class Quest {
         player.updateKnowledge(game.getLocation(10));
         player.updateKnowledge(game.getLocation(11));
 
+        //visitedLocations.add(game.getLocation(player));
+        //visitedLocations.add(0,new ArrayList<Location>());
+        //visitedLocations.get(0).add(game.getLocation(player));
+
         currentLocation = game.getLocation(player);
 
         Log.d("Quest", "--- NEW QUEST -------------------------------------------------");
+        Log.d("Quest", "Quest Giver: " + questGiver.getName() + " Home: " + questGiver.getHomeSTRING());
 
         createAbstractQuest();
 
@@ -364,14 +371,14 @@ public class Quest {
                     case 0: // Obtain Luxuries
                         Item getItem = game.getItem(3);
                         questListAbstract.add(new Action(countAction.increment() ,20, getItem));    //<get> Item
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(getItem)));    //<goto> Item
+                        //questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(getItem)));    //<goto> Item
                         questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(questGiver)));                    //<goto> quetGIver
                         questListAbstract.add(new Action(countAction.increment() ,9, getItem, questGiver));    //<give> Item
                         break;
 
                     case 1: //Kill pests
                         NPC pests = game.getNPC();
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(pests)));                    //<goto> pests
+                        //questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(pests)));                    //<goto> pests
                         questListAbstract.add(new Action(countAction.increment() ,11, pests));          //<kill> pests
                         questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(questGiver)));                    //<goto> quest giver
                         questListAbstract.add(new Action(countAction.increment() ,15, questGiver));  //report to quetGIver
@@ -414,8 +421,10 @@ public class Quest {
 
                 switch (strategyID){
                     case 0: //revenge justice
-                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation()));                    //<goto> location
-                        questListAbstract.add(new Action(countAction.increment() ,11, game.getNPC()));          //<kill> npc
+                        NPC npc0 = game.getNPC();
+
+                        questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(npc0)));                    //<goto> location
+                        questListAbstract.add(new Action(countAction.increment() ,11, npc0));          //<kill> npc
                         break;
 
                     case 1: //capture criminal
@@ -664,15 +673,14 @@ public class Quest {
 
                         questListAbstract.add(new Action(countAction.increment() ,20, getItem));   //<get> takeable item
                         questListAbstract.add(new Action(countAction.increment() ,10, game.getLocation(questGiver))); //<goto> quest giver
-                        questListAbstract.add(new Action(countAction.increment() ,9, getItem, questGiver)); //Give Item to NPC
+                        questListAbstract.add(new Action(countAction.increment() ,31, getItem, questGiver)); //Give Item to NPC
                         break;
 
                     case 2: //Steal supplies
                         Item steal = game.getItem(3);
                         NPC npc = game.getNPC();
-
-
                         questListAbstract.add(new Action(countAction.increment() ,21, steal, npc)); //steal Item
+                        questListAbstract.add(new Action(countAction.increment() ,31, steal, questGiver)); //Give Item to NPC
                         break;
 
                     case 3: // trade for supplies
@@ -767,14 +775,14 @@ public class Quest {
         int c = prmTSplit.getAction().getActionID();
         GameObject gOBJ = prmTSplit.getAction().getGameObject();
 
-        Log.d("Quest applyRules: " , "-----> " + applyRulesCounter + ". Iteration: " + prmTSplit.getName() + " Action: " + prmTSplit.getAction().getActionName() + " " + gOBJ.getName());
+        Log.d("Quest applyRules: " , "-----> " + applyRulesCounter + ". Iteration: " + prmTSplit.getName() + " Action: ID-"  + prmTSplit.getAction().getActionID() + " " + prmTSplit.getAction().getActionName() + " " + gOBJ.getName());
 
 
         // For each action ID, there are several Rules how to rewrite them
         switch (c) {
             case 1: // <capture>
-                Log.d("Quest applyRules: " ,"Rule 17: [<capture> --> <get>, <goto>, capture]");
-                appliedRulesList.add(17);
+                Log.d("Quest applyRules: " ,"Rule 13: [<capture> --> <get>, <goto>, capture]");
+                appliedRulesList.add(13);
 
                 newActionsList.add(new Action(countAction.increment() ,20, game.getItem(7))); //<get>
                 newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ))); //<goto>
@@ -783,29 +791,30 @@ public class Quest {
                 break;
 
             case 10: // <goto>
-                Log.d("Quest applyRules: " ,"Current Location: " + currentLocation.getName());
+                Log.d("Quest applyRules: " ,"Current Location: " +currentLocation.getName());
                 Log.d("Quest applyRules: " ,"Goal Location: " + game.getLocation(gOBJ).getName());
                 // If location is unknown, learn it
                 if(player.checkKN(gOBJ) == false){
-                    appliedRulesList.add(5);
-                    Log.d("Quest applyRules: " ,"Rule 5: [<goto> --> <learn>, goto]");
+                    appliedRulesList.add(3);
+                    Log.d("Quest applyRules: " ,"Rule 3: [<goto> --> <learn>, goto]");
 
                     newActionsList.add(new Action(countAction.increment() ,23, game.getLocation(gOBJ)));   //<learn>
                     newActionsList.add(new Action(countAction.increment() ,25, gOBJ)); //goto
                     //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
                 }
                 else{ // else go to it
-                    if(currentLocation == game.getLocation(gOBJ)){
+                    boolean visited = false;
 
-                        Log.d("Quest applyRules: " ,"Rule 4: [<goto> --> explore]");
-                        appliedRulesList.add(4);
+
+                    if (currentLocation == game.getLocation(gOBJ)){
+                        Log.d("Quest applyRules: " ,"Rule 2: [<goto> --> explore]");
+                        appliedRulesList.add(2);
 
                         newActionsList.add(new Action(countAction.increment() ,7, gOBJ));    //explore
                         //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
-                    }
-                    else{
-                        Log.d("Quest applyRules: " ,"Rule 3: [<goto> --> goto]");
-                        appliedRulesList.add(3);
+                    }else {
+                        Log.d("Quest applyRules: " ,"Rule 1: [<goto> --> goto]");
+                        appliedRulesList.add(1);
 
                         newActionsList.add(new Action(countAction.increment() ,25, gOBJ));   // goto
                         //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
@@ -816,8 +825,8 @@ public class Quest {
 
 
             case 11: // <kill>
-                appliedRulesList.add(18);
-                Log.d("Quest applyRules: " ,"Rule 18: [<kill> --> <goto>, kill]");
+                appliedRulesList.add(15);
+                Log.d("Quest applyRules: " ,"Rule 15: [<kill> --> <goto>, kill]");
                 newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ)));   //<goto>
                 newActionsList.add(new Action(countAction.increment() ,26, gOBJ)); //kill
                 //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
@@ -825,8 +834,8 @@ public class Quest {
                 break;
 
             case 16: // <spy>
-                appliedRulesList.add(16);
-                Log.d("Quest applyRules: " ,"Rule 16: [<spy> --> <goto>, spy, goto, report]");
+                appliedRulesList.add(12);
+                Log.d("Quest applyRules: " ,"Rule 12: [<spy> --> <goto>, spy, goto, report]");
                 newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ)));   //<goto>
                 newActionsList.add(new Action(countAction.increment() ,27, gOBJ)); //spy
                 newActionsList.add(new Action(countAction.increment() ,25, game.getLocation(questGiver))); //goto (back to gquest giver)
@@ -837,20 +846,21 @@ public class Quest {
 
             case 20: // <get>
 
-                if(currentLocation == game.getLocation(player)){
 
-                    appliedRulesList.add(10);
-                    newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //gather
-                    //newActionsList.get(newActionsList.size()-1).setDescriptionAdd("You already have " + gOBJ.getName());
-                    //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
+                //if(currentLocation == game.getLocation(gOBJ)){
 
-                }
-                else{
+                  //  appliedRulesList.add(10);
+                    //newActionsList.add(new Action(countAction.increment() ,7, game.getLocation(gOBJ)));   //explore locatoin of Gobj
+                    //newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //gather
+
+
+               // }
+               // else{
 
                     switch ((int) (Math.random() * 3)) {
 
                         case 0:
-                            appliedRulesList.add(11);
+                            appliedRulesList.add(7);
 
                             //if the last transition is a transition, that holds a goto action than we need do macke shure, taht the NPC is at that location
                             NPC npc = game.getNPC();
@@ -864,22 +874,22 @@ public class Quest {
 
                             Item item = (Item) gOBJ;
 
-                            Log.d("Quest applyRules: " ,"Rule 11: [<get> --> <steal>]");
+                            Log.d("Quest applyRules: " ,"Rule 7: [<get> --> <steal>]");
                             newActionsList.add(new Action(countAction.increment() ,21 , item, npc));   //<steal>
                             //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                             break;
                         case 1:
-                            appliedRulesList.add(12);
-                            Log.d("Quest applyRules: " ,"Rule 12: [<get> --> <goto>, <gather>]");
+                            appliedRulesList.add(8);
+                            Log.d("Quest applyRules: " ,"Rule 8: [<get> --> <goto>, <gather>]");
                             newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(gOBJ)));   //<goto>
                             newActionsList.add(new Action(countAction.increment() ,8, gOBJ));   //<gather>
                             //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                             break;
                         case 2:
-                            appliedRulesList.add(13);
-                            Log.d("Quest applyRules: " ,"Rule 13: [<get> --> <goto>, <get>, <goto>, <subquest>, exchange]");
+                            appliedRulesList.add(9);
+                            Log.d("Quest applyRules: " ,"Rule 9: [<get> --> <goto>, <get>, <goto>, <subquest>, exchange]");
 
                             Item itemForPlayer = prmTSplit.getAction().getItem(0);
                             Item itemForNPC = game.getItem(3);
@@ -894,7 +904,7 @@ public class Quest {
                             break;
                     }
 
-                }
+              //  }
 
 
                 break;
@@ -902,8 +912,8 @@ public class Quest {
             case 21: // <steal>
                 switch ((int) (Math.random() * 2)) {
                     case 0:
-                        appliedRulesList.add(14);
-                        Log.d("Quest applyRules: " ,"Rule 14: [<steal> --> <goto>, stealth, take]");
+                        appliedRulesList.add(10);
+                        Log.d("Quest applyRules: " ,"Rule 10: [<steal> --> <goto>, stealth, take]");
 
                         //FEHLER
                         NPC steal = prmTSplit.getAction().getNPC(0);
@@ -911,20 +921,20 @@ public class Quest {
 
                         newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(steal)));   //<goto>
                         newActionsList.add(new Action(countAction.increment() ,17, steal)); //stealth
-                        newActionsList.add(new Action(countAction.increment() ,18, take)); //take
+                        newActionsList.add(new Action(countAction.increment() ,18, take, steal)); //take
                         //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                         break;
                     case 1:
-                        appliedRulesList.add(15);
-                        Log.d("Quest applyRules: " ,"Rule 15: [<steal> --> <goto>, <kill>, take]");
+                        appliedRulesList.add(11);
+                        Log.d("Quest applyRules: " ,"Rule 11: [<steal> --> <goto>, <kill>, take]");
 
                         NPC steal2 = prmTSplit.getAction().getNPC(0);
                         Item take2 = prmTSplit.getAction().getItem(0);
 
                         newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(steal2)));   //<goto>
                         newActionsList.add(new Action(countAction.increment() ,11, steal2)); //<kill>
-                        newActionsList.add(new Action(countAction.increment() ,18, take2)); //take
+                        newActionsList.add(new Action(countAction.increment() ,18, take2, steal2)); //take
                         //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                         break;
@@ -966,27 +976,27 @@ public class Quest {
                     switch ((int) (Math.random() * 3)) {
 
                         case 0:
-                            appliedRulesList.add(7);
-                            Log.d("Quest applyRules: " ,"Rule 7: [<learn> --> <goto>, <subquest>, listen]");
+                            appliedRulesList.add(4);
+                            Log.d("Quest applyRules: " ,"Rule 4: [<learn> --> <goto>, listen]");
 
                             NPC listen = game.getNPC();
 
                             // Check special case: cannot go somewhere u dont know
                             while(game.getLocation(listen) == game.getLocation(gOBJ))
                             {
-                                Log.d("Quest Special Case: " ,"Rule 7");
+                                Log.d("Quest Special Case: " ,"Rule 5");
                                 listen = game.getNPC();
                             }
 
                             newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(listen)));   //<goto>
                             //newActionsList.add(new Action(countAction.increment() ,22, game.getPlaceholder())); //<subquest>
-                            newActionsList.add(new Action(countAction.increment() ,12, listen)); //listen
+                            newActionsList.add(new Action(countAction.increment() ,12, listen, gOBJ)); //listen
                             //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                             break;
                         case 1:
-                            appliedRulesList.add(8);
-                            Log.d("Quest applyRules: " ,"Rule 8: [<learn> --> <goto>, <get>, read]");
+                            appliedRulesList.add(5);
+                            Log.d("Quest applyRules: " ,"Rule 5: [<learn> --> <goto>, <get>, read]");
 
                             Item read = game.getItem(4);
 
@@ -996,13 +1006,13 @@ public class Quest {
 
                             newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(read)));   //<goto>
                             newActionsList.add(new Action(countAction.increment() ,20, read)); //<get>
-                            newActionsList.add(new Action(countAction.increment() ,13, read)); //read
+                            newActionsList.add(new Action(countAction.increment() ,13, read, gOBJ)); //read
                             //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                             break;
                         case 2:
-                            appliedRulesList.add(9);
-                            Log.d("Quest applyRules: " ,"Rule 9: [<learn> --> <get> <subquest>, give, listen]");
+                            appliedRulesList.add(6);
+                            Log.d("Quest applyRules: " ,"Rule 6: [<learn> --> <get>, give, listen]");
 
                             Item give = game.getItem();
                             NPC listen2 = game.getNPC();
@@ -1011,13 +1021,22 @@ public class Quest {
                             //newActionsList.add(new Action(countAction.increment() ,22, game.getPlaceholder())); //<subquest>
                             newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(listen2)));   //<goto>
                             newActionsList.add(new Action(countAction.increment() ,9, give, listen2)); //give
-                            newActionsList.add(new Action(countAction.increment() ,12,listen2)); //listen
+                            newActionsList.add(new Action(countAction.increment() ,12,listen2, gOBJ)); //listen
                             //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
 
                             break;
-                  //  }
+
+
 
                 }
+                break;
+
+            case 31: // <give>
+                appliedRulesList.add(14);
+                Log.d("Quest applyRules: " ,"Rule 14: [<give> --> <goto>, give]");
+                newActionsList.add(new Action(countAction.increment() ,10, game.getLocation(prmTSplit.getAction().getNPC(0))));   //<goto>
+                newActionsList.add(new Action(countAction.increment() ,9, prmTSplit.getAction().getItem(0),questGiver)); //give item to npc
+                //rewritePetrinet(prmTSplit,prmTMerge,newActionsList);
                 break;
 
             default:
@@ -1066,6 +1085,7 @@ public class Quest {
             if(a.getActionID() == 25){
                 currentLocation = game.getLocation(a.getGameObject());
             }
+
             // ------------------------------------------------------------
 
             //Setup Transition
@@ -1164,7 +1184,7 @@ public class Quest {
 
         Log.d("Quest printLists: " , "#Actions: " + questListAbstract.size());
         for(int r = 0; r < questListAbstract.size(); r++) {
-            Log.d("Quest printLists" , " Action ID: " + questListAbstract.get(r).getActionID()+ " Action Name: " + questListAbstract.get(r).getActionName());
+            Log.d("Quest printLists" , " Action ID: " + questListAbstract.get(r).getActionID()+ " Action Name: " + questListAbstract.get(r).getActionName() + " Object " + questListAbstract.get(r).getGameObject().getName());
         }
 
         Log.d("Quest pL: " , "#Used Rules: : " + appliedRulesList.size());
@@ -1469,6 +1489,23 @@ public class Quest {
 
     public ArrayList getActions(){
         return actionDescriptions;
+    }
+
+    public int getMotivationID(){
+        return motivationID;
+    }
+
+    public int getStrategyID(){
+        return strategyID;
+    }
+
+    public ArrayList<Integer> getAppliedRulesList(){
+
+        return appliedRulesList;
+    }
+
+    public int getQuestDepth(){
+        return questDepth;
     }
 
 }
