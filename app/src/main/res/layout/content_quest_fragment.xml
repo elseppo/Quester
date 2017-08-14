@@ -16,7 +16,7 @@
         android:textSize="22dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Character motivation and strategy: "
+        android:text="Character Motivation and Strategy: "
         android:textAlignment="center"
         android:textColor="@color/colorHL"
         app:layout_constraintRight_toRightOf="parent"

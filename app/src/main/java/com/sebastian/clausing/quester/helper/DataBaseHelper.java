@@ -27,15 +27,9 @@ public class DataBaseHelper {
             createDb = true;
         }
         else {
-            // Check that we have the latest version of the db
             boolean doUpgrade = true;
             Log.d("DBHelper", "Upgrade DB");
-            // Insert your own logic here on whether to upgrade the db; I personally
-            // just store the db version # in a text file, but you can do whatever
-            // you want.  I've tried MD5 hashing the db before, but that takes a while.
 
-            // If we are doing an upgrade, basically we just delete the db then
-            // flip the switch to create a new one
             if (doUpgrade) {
                 dbFile.delete();
                 createDb = true;
@@ -43,20 +37,15 @@ public class DataBaseHelper {
         }
 
         if (createDb) {
-            // Open your local db as the input stream
             InputStream myInput = context.getAssets().open(DB_NAME);
-
-            // Open the empty db as the output stream
             OutputStream myOutput = new FileOutputStream(dbFile);
 
-            // transfer bytes from the inputfile to the outputfile
             byte[] buffer = new byte[1024];
             int length;
             while ((length = myInput.read(buffer)) > 0) {
                 myOutput.write(buffer, 0, length);
             }
 
-            // Close the streams
             myOutput.flush();
             myOutput.close();
             myInput.close();

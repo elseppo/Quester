@@ -6,14 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ein Petrinetz kennt alle Elemente.
- * 
- * Deshalb sollten nach M�glichkeit auch besser diese Factory-Methoden 
- * zum Erstellen von Objekten benutzt werden, anstatt die Konstruktoren 
- * direkt aufzurufen.
- * 
+ * https://github.com/rmetzler/simple-java-petrinet
  * @author rmetzler
- *
  */
 
 public class Petrinet

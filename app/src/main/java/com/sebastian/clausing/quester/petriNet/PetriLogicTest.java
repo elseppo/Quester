@@ -3,12 +3,7 @@ package com.sebastian.clausing.quester.petriNet;
 import junit.framework.TestCase;
 
 /**
- * 
- * Klasse zum Testen der Logik
- * 
- * Es wird ein einfaches Petrinetz aufgebaut, einige Transitionen gefeuert
- * und �berpr�ft ob hinterher die richtigen Werte in den Objekten stehen.
- * 
+ * https://github.com/rmetzler/simple-java-petrinet
  * @author rmetzler
  */
 

@@ -1,5 +1,9 @@
 package com.sebastian.clausing.quester.petriNet;
 
+/**
+ * https://github.com/rmetzler/simple-java-petrinet
+ * @author rmetzler
+ */
 
 public class Place 
 extends PetrinetObject {

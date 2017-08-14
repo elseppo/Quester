@@ -7,6 +7,11 @@ import com.sebastian.clausing.quester.questGen.Action;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * https://github.com/rmetzler/simple-java-petrinet
+ * @author rmetzler
+ */
+
 public class Transition
 extends PetrinetObject{
 

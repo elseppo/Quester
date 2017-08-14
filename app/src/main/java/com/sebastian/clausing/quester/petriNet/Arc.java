@@ -1,11 +1,10 @@
 package com.sebastian.clausing.quester.petriNet;
 
 /**
- * Eine Kante geht von einer Stelle zu einer Transition oder umgekehrt.
- * Das wird �ber die Konstruktoren abgebildet.
- * 
+ * https://github.com/rmetzler/simple-java-petrinet
  * @author rmetzler
  */
+
 public class Arc
 extends PetrinetObject {
 
